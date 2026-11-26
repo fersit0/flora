@@ -5,8 +5,9 @@ import { contenidoDeEjemplo, semanaDeEjemplo } from './datos/ejemplo'
 import { leerDatos } from './logic/respaldo'
 import type { Semana } from './logic/semana'
 import { Ajustes } from './pantallas/Ajustes'
+import { Finde } from './pantallas/Finde'
 import { Hoja } from './pantallas/Hoja'
-import { Horario } from './pantallas/Horario'
+import { Horario, type QueAbre } from './pantallas/Horario'
 import { PegaTuSemana } from './pantallas/PegaTuSemana'
 
 // Con ?demo=1 se ve la semana de ejemplo, y lo que se escribe en sus hojas se guarda
@@ -27,8 +28,8 @@ export function App() {
   const [estado, setEstado] = useState<Estado>(() =>
     demo ? { modo: 'semana', semana: semanaDeEjemplo(), textoSemana: '' } : { modo: 'cargando' },
   )
-  const [abierta, setAbierta] = useState<string | null>(null)
-  const [ajustes, setAjustes] = useState(false)
+  // Lo que está abierto en una hoja (solo una a la vez)
+  const [abierta, setAbierta] = useState<QueAbre | null>(null)
 
   // Su semana está guardada en el teléfono desde que la pegó
   useEffect(() => {
@@ -60,7 +61,6 @@ export function App() {
   }, [])
 
   const alCerrar = useCallback(() => setAbierta(null), [])
-  const alCerrarAjustes = useCallback(() => setAjustes(false), [])
 
   let pantalla: ReactNode = null
   if (estado.modo === 'primera') {
@@ -68,27 +68,29 @@ export function App() {
     pantalla = <PegaTuSemana onListo={(texto) => usarDatos(texto, true)} />
   } else if (estado.modo === 'semana') {
     const { semana } = estado
-    const espacio = semana.espacios.find((e) => e.id === abierta)
+    let hoja: ReactNode = null
+    if (abierta && 'espacio' in abierta) {
+      const espacio = semana.espacios.find((e) => e.id === abierta.espacio)
+      if (espacio) {
+        hoja = <Hoja key={espacio.id} semana={semana} espacio={espacio} guardado={guardado} onCerrada={alCerrar} />
+      }
+    } else if (abierta && 'finde' in abierta) {
+      hoja = <Finde key={abierta.finde} dia={abierta.finde} texto={semana.finde[abierta.finde]} onCerrada={alCerrar} />
+    } else if (abierta) {
+      hoja = (
+        <Ajustes
+          ejemplo={demo}
+          textoSemana={estado.textoSemana}
+          guardado={guardado}
+          onPegar={usarDatos}
+          onCerrada={alCerrar}
+        />
+      )
+    }
     pantalla = (
       <>
-        <Horario
-          semana={semana}
-          onAbrir={setAbierta}
-          onAjustes={() => setAjustes(true)}
-          tapado={espacio !== undefined || ajustes}
-        />
-        {espacio && (
-          <Hoja key={espacio.id} semana={semana} espacio={espacio} guardado={guardado} onCerrada={alCerrar} />
-        )}
-        {ajustes && (
-          <Ajustes
-            ejemplo={demo}
-            textoSemana={estado.textoSemana}
-            guardado={guardado}
-            onPegar={usarDatos}
-            onCerrada={alCerrarAjustes}
-          />
-        )}
+        <Horario semana={semana} onAbrir={setAbierta} tapado={hoja !== null} />
+        {hoja}
       </>
     )
   }

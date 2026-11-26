@@ -12,7 +12,7 @@ test('abrir es ver: directo en el horario, con título y los cinco días', async
   await abrir(page, MIERCOLES_MEDIODIA)
   await expect(page.locator('h1')).toHaveText('Flora')
   await expect(page.locator('.dia')).toHaveText(['lun', 'mar', 'mié', 'jue', 'vie'])
-  await expect(page.locator('.finde-dia h2')).toHaveText(['sábado', 'domingo'])
+  await expect(page.locator('.finde-nombre')).toHaveText(['sábado', 'domingo'])
 })
 
 test('cabe sin deslizar y ningún bloque corta su texto', async ({ page }) => {
@@ -65,13 +65,13 @@ test('sábado: no hay columna de hoy y se resalta el recuadro del sábado', asyn
   await expect(page.locator('.columna.hoy')).toHaveCount(0)
   await expect(page.locator('.dia.hoy')).toHaveCount(0)
   await expect(page.locator('.ahora')).toHaveCount(0)
-  await expect(page.locator('.finde-dia.hoy h2')).toHaveText('sábado')
-  await expect(page.locator('.finde-dia.hoy p')).toHaveText(ejemplo.finde.sab.corto)
+  await expect(page.locator('.finde-dia.hoy .finde-nombre')).toHaveText('sábado')
+  await expect(page.locator('.finde-dia.hoy .finde-corto')).toHaveText(ejemplo.finde.sab.corto)
 })
 
 test('domingo: se resalta el recuadro del domingo', async ({ page }) => {
   await abrir(page, DOMINGO)
-  await expect(page.locator('.finde-dia.hoy h2')).toHaveText('domingo')
+  await expect(page.locator('.finde-dia.hoy .finde-nombre')).toHaveText('domingo')
   await revisarQueCabe(page)
 })
 

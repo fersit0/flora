@@ -4,20 +4,22 @@
 import type { CSSProperties } from 'react'
 import { Sol } from '../componentes/Sol'
 import { useAhora } from '../componentes/useAhora'
-import { DIAS, type Bloque, type Semana } from '../logic/semana'
+import { DIAS, direccionDeLiga, type Bloque, type Semana, type TextoFinde } from '../logic/semana'
 import { etiquetaHora, horaDecimal, lineaAhora, posicion, queDiaEs } from '../logic/tiempo'
+import { NOMBRE_FINDE, type DiaFinde } from './Finde'
+
+/** Lo que se abre en una hoja al tocarlo: un espacio, sábado o domingo, o los ajustes */
+export type QueAbre = { espacio: string } | { finde: DiaFinde } | { ajustes: true }
 
 interface Props {
   semana: Semana
-  /** Al tocar un bloque que abre un espacio */
-  onAbrir: (espacio: string) => void
-  /** Al tocar el solecito */
-  onAjustes: () => void
+  /** Al tocar un bloque con hoja, sábado, domingo o el solecito */
+  onAbrir: (que: QueAbre) => void
   /** Mientras hay una hoja abierta, el horario de atrás no se puede tocar */
   tapado: boolean
 }
 
-export function Horario({ semana, onAbrir, onAjustes, tapado }: Props) {
+export function Horario({ semana, onAbrir, tapado }: Props) {
   const ahora = useAhora()
   const hoy = queDiaEs(ahora)
   const { inicio, fin } = semana.horas
@@ -31,7 +33,7 @@ export function Horario({ semana, onAbrir, onAjustes, tapado }: Props) {
       <header className="cabecera">
         <h1>Flora</h1>
         {/* El solecito es el botón de ajustes; no dice "ajustes" */}
-        <button type="button" className="boton-sol" aria-label="ajustes" onClick={onAjustes}>
+        <button type="button" className="boton-sol" aria-label="ajustes" onClick={() => onAbrir({ ajustes: true })}>
           <Sol />
         </button>
       </header>
@@ -60,7 +62,14 @@ export function Horario({ semana, onAbrir, onAjustes, tapado }: Props) {
             return (
               <div key={dia} className={esHoy ? 'columna hoy' : 'columna'} data-dia={dia}>
                 {semana.dias[dia].map((b) => (
-                  <BloqueHorario key={`${b.de}-${b.nombre}`} bloque={b} inicio={inicio} fin={fin} onAbrir={onAbrir} />
+                  <BloqueHorario
+                    key={`${b.de}-${b.nombre}`}
+                    bloque={b}
+                    liga={direccionDeLiga(semana, b.abre)}
+                    inicio={inicio}
+                    fin={fin}
+                    onAbrir={onAbrir}
+                  />
                 ))}
                 {esHoy && linea !== null && <div className="ahora" style={{ top: `${linea}%` }} />}
               </div>
@@ -70,27 +79,54 @@ export function Horario({ semana, onAbrir, onAjustes, tapado }: Props) {
       </div>
 
       <div className="finde">
-        <div className={hoy.dia === 'sab' ? 'finde-dia hoy' : 'finde-dia'}>
-          <h2>sábado</h2>
-          <p>{semana.finde.sab.corto}</p>
-        </div>
-        <div className={hoy.dia === 'dom' ? 'finde-dia hoy' : 'finde-dia'}>
-          <h2>domingo</h2>
-          <p>{semana.finde.dom.corto}</p>
-        </div>
+        {(['sab', 'dom'] as const).map((dia) => (
+          <FindeDia
+            key={dia}
+            dia={dia}
+            texto={semana.finde[dia]}
+            hoy={hoy.dia === dia}
+            onAbrir={() => onAbrir({ finde: dia })}
+          />
+        ))}
       </div>
     </main>
   )
 }
 
-interface PropsBloque {
-  bloque: Bloque
-  inicio: number
-  fin: number
-  onAbrir: (espacio: string) => void
+interface PropsFinde {
+  dia: DiaFinde
+  texto: TextoFinde
+  hoy: boolean
+  onAbrir: () => void
 }
 
-function BloqueHorario({ bloque, inicio, fin, onAbrir }: PropsBloque) {
+/** Sábado o domingo: el texto corto; al tocarlo, el largo (si no hay texto, no es botón) */
+function FindeDia({ dia, texto, hoy, onAbrir }: PropsFinde) {
+  const clase = hoy ? 'finde-dia hoy' : 'finde-dia'
+  const contenido = (
+    <>
+      <span className="finde-nombre">{NOMBRE_FINDE[dia]}</span>
+      <span className="finde-corto">{texto.corto}</span>
+    </>
+  )
+  if (!texto.largo) return <div className={clase}>{contenido}</div>
+  return (
+    <button type="button" className={clase} onClick={onAbrir}>
+      {contenido}
+    </button>
+  )
+}
+
+interface PropsBloque {
+  bloque: Bloque
+  /** A dónde lleva su liga, o null si no tiene */
+  liga: string | null
+  inicio: number
+  fin: number
+  onAbrir: (que: QueAbre) => void
+}
+
+function BloqueHorario({ bloque, liga, inicio, fin, onAbrir }: PropsBloque) {
   const { arriba, alto } = posicion(bloque.de, bloque.a, inicio, fin)
   const estilo = { '--arriba': `${arriba}%`, '--alto': `${alto}%` } as CSSProperties
   const clase = `bloque color-${bloque.color}`
@@ -101,14 +137,21 @@ function BloqueHorario({ bloque, inicio, fin, onAbrir }: PropsBloque) {
     </>
   )
 
-  // Solo es botón si abre algo. Las ligas llegan en la fase 4 y las comidas después;
-  // mientras, esos bloques no son botones (nunca un botón que no hace nada).
+  // Solo se puede tocar si abre algo: su hoja o su liga. Una liga sin dirección
+  // y las comidas (llegan después) no se pueden tocar: nunca un botón que no hace nada.
   const espacio = bloque.abre && 'espacio' in bloque.abre ? bloque.abre.espacio : null
   if (espacio) {
     return (
-      <button type="button" className={clase} style={estilo} onClick={() => onAbrir(espacio)}>
+      <button type="button" className={clase} style={estilo} onClick={() => onAbrir({ espacio })}>
         {contenido}
       </button>
+    )
+  }
+  if (liga) {
+    return (
+      <a className={clase} style={estilo} href={liga}>
+        {contenido}
+      </a>
     )
   }
   return (

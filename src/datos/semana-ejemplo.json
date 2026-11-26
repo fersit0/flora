@@ -8,7 +8,7 @@
     { "id": "cafe", "nombre": "Café Lirio", "emoji": "☕", "color": "sol", "tipo": "cliente" },
     { "id": "ideas", "nombre": "ideas", "emoji": "💡", "color": "vino", "tipo": "ideas" }
   ],
-  "ligas": { "planeador": "", "correo": "" },
+  "ligas": { "planeador": "https://example.com/", "correo": "message://" },
   "dias": {
     "lun": [
       { "de": 8, "a": 9, "color": "papel", "emoji": "🚶‍♀️", "nombre": "caminar", "nombreLargo": "caminar", "detalle": "por el parque", "abre": null },

@@ -50,14 +50,16 @@ test('varios bloques abren la misma hoja', async ({ page }) => {
   }
 })
 
-test('solo son botones los bloques que abren algo', async ({ page }) => {
-  const queAbren = Object.values(ejemplo.dias)
-    .flat()
-    .filter((b) => b.abre && 'espacio' in b.abre).length
-  await expect(page.locator('button.bloque')).toHaveCount(queAbren)
-  // Las ligas (fase 4), las comidas (después) y los que no abren nada no son botones todavía
-  for (const nombre of ['caminar', 'comida', 'crear lo mío', 'correos', 'lo suelto']) {
+test('solo se pueden tocar los bloques que abren algo: su hoja o su liga', async ({ page }) => {
+  const bloques = Object.values(ejemplo.dias).flat()
+  const conHoja = bloques.filter((b) => b.abre && 'espacio' in b.abre).length
+  const conLiga = bloques.filter((b) => b.abre && 'liga' in b.abre).length
+  await expect(page.locator('button.bloque')).toHaveCount(conHoja)
+  await expect(page.locator('a.bloque')).toHaveCount(conLiga)
+  // Las comidas (llegan después) y los que no abren nada no se pueden tocar
+  for (const nombre of ['caminar', 'comida', 'lo suelto']) {
     await expect(page.locator('.bloque', { hasText: nombre }).first()).not.toHaveRole('button')
+    await expect(page.locator('.bloque', { hasText: nombre }).first()).not.toHaveRole('link')
   }
 })
 

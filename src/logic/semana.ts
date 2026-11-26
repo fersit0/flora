@@ -247,3 +247,23 @@ export function diasDeEspacio(semana: Semana, id: string): Dia[] {
 export function resumenDeEspacio(semana: Semana, espacio: Espacio): string {
   return semana.porCadaCosa.find((r) => r.nombre === espacio.nombre)?.texto ?? ''
 }
+
+/** Direcciones que nunca se abren: no llevan a ninguna página ni app, y pueden ser peligrosas */
+const NO_SE_ABREN = ['javascript:', 'data:', 'vbscript:', 'file:', 'blob:', 'about:']
+
+/**
+ * La dirección que abre un bloque con liga (una página, o una app como "message://"),
+ * o `null` si no abre nada: la liga no existe, está vacía o no es una dirección.
+ * Un bloque sin dirección no es botón: nunca un botón que no hace nada.
+ */
+export function direccionDeLiga(semana: Semana, abre: Abre): string | null {
+  if (abre === null || !('liga' in abre)) return null
+  const valor = (semana.ligas[abre.liga] ?? '').trim()
+  if (!valor) return null
+  try {
+    const url = new URL(valor)
+    return NO_SE_ABREN.includes(url.protocol) ? null : url.href
+  } catch {
+    return null
+  }
+}

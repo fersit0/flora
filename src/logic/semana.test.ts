@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import ejemplo from '../datos/semana-ejemplo.json?raw'
-import { DIAS, diasDeEspacio, leerSemana, resumenDeEspacio, type Semana } from './semana'
+import { DIAS, diasDeEspacio, direccionDeLiga, leerSemana, resumenDeEspacio, type Semana } from './semana'
 
 function lee(texto: string): Semana {
   const r = leerSemana(texto)
@@ -109,5 +109,49 @@ describe('lo que va en la hoja de cada espacio', () => {
     const velas = s.espacios.find((e) => e.id === 'velas')!
     expect(resumenDeEspacio(s, velas)).toBe('lunes grabo, miércoles edito, viernes entrego.')
     expect(resumenDeEspacio({ ...s, porCadaCosa: [] }, velas)).toBe('')
+  })
+})
+
+describe('a dónde lleva cada liga', () => {
+  function conLigas(ligas: Record<string, string>): Semana {
+    return lee(JSON.stringify({ ...base(), ligas }))
+  }
+
+  it('una liga con dirección abre esa dirección: una página, el correo o una app', () => {
+    const s = conLigas({ planeador: 'https://example.com/mi-plan', correo: 'message://', agenda: 'mailto:hola@example.com' })
+    expect(direccionDeLiga(s, { liga: 'planeador' })).toBe('https://example.com/mi-plan')
+    expect(direccionDeLiga(s, { liga: 'correo' })).toBe('message://')
+    expect(direccionDeLiga(s, { liga: 'agenda' })).toBe('mailto:hola@example.com')
+  })
+
+  it('por confirmar no cambia nada: si tiene dirección, abre', () => {
+    const s = conLigas({ planeador: 'https://example.com' })
+    expect(direccionDeLiga(s, { liga: 'planeador', porConfirmar: true })).toBe('https://example.com/')
+  })
+
+  it('sin dirección, con una que no existe o con espacios nada más, no abre nada', () => {
+    const s = conLigas({ planeador: '', correo: '   ' })
+    expect(direccionDeLiga(s, { liga: 'planeador' })).toBeNull()
+    expect(direccionDeLiga(s, { liga: 'correo' })).toBeNull()
+    expect(direccionDeLiga(s, { liga: 'no-existe' })).toBeNull()
+  })
+
+  it('lo que no es una dirección, o es peligroso, no abre nada', () => {
+    const s = conLigas({
+      a: 'mi planeador',
+      b: 'javascript:alert(1)',
+      c: ' JavaScript:alert(1)',
+      d: 'java\tscript:alert(1)',
+      e: 'data:text/html,hola',
+      f: 'file:///etc/passwd',
+    })
+    for (const liga of ['a', 'b', 'c', 'd', 'e', 'f']) expect(direccionDeLiga(s, { liga }), liga).toBeNull()
+  })
+
+  it('los bloques que no son liga no tienen dirección', () => {
+    const s = conLigas({ planeador: 'https://example.com' })
+    expect(direccionDeLiga(s, null)).toBeNull()
+    expect(direccionDeLiga(s, { espacio: 'agencia' })).toBeNull()
+    expect(direccionDeLiga(s, { comida: 'cena' })).toBeNull()
   })
 })

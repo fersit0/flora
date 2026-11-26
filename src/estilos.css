@@ -264,11 +264,15 @@ textarea {
   -webkit-appearance: none;
   appearance: none;
 }
-button.bloque {
+/* Los que se pueden tocar: abren su hoja (botón) o su liga */
+button.bloque,
+a.bloque {
   cursor: pointer;
+  text-decoration: none;
   transition: transform 120ms ease-out;
 }
-button.bloque:active {
+button.bloque:active,
+a.bloque:active {
   transform: scale(0.96);
 }
 .bloque .emoji {
@@ -348,25 +352,41 @@ button.bloque:active {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: stretch;
   gap: 2px;
+  margin: 0;
   padding: 0 13px;
   background: var(--mantequilla);
   border: 2px solid transparent;
   border-radius: 16px;
   overflow: hidden;
+  font: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Al tocarlo sube su hoja con el texto largo */
+button.finde-dia {
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+button.finde-dia:active {
+  transform: scale(0.97);
 }
 /* En fin de semana no hay columna de hoy: se resalta el recuadro */
 .finde-dia.hoy {
   border-color: var(--vino);
 }
-.finde-dia h2 {
+.finde-nombre {
+  display: block;
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
   font-size: 15px;
   line-height: 1.1;
 }
-.finde-dia p {
+.finde-corto {
+  display: block;
   font-size: 11.5px;
   line-height: 1.2;
   white-space: nowrap;
@@ -458,6 +478,8 @@ html:not(.instalada) .pantalla {
   .capa-hoja.cerrando .velo,
   .capa-hoja.cerrando .hoja,
   button.bloque,
+  a.bloque,
+  button.finde-dia,
   .boton-sol {
     animation: none;
     transition: none;
@@ -794,6 +816,14 @@ input.renglon-texto {
 .boton:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* Sábado y domingo: el texto largo */
+.finde-largo {
+  margin-top: 16px;
+  font-size: 15.5px;
+  line-height: 1.45;
+  white-space: pre-line;
 }
 
 /* Ajustes */
