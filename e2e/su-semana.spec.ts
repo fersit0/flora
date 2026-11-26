@@ -12,6 +12,8 @@ const ruta = join(import.meta.dirname, '..', 'privado', 'semana.json')
 test.skip(!existsSync(ruta), 'solo corre donde está la carpeta privado/')
 
 test('su semana real cabe sin deslizar y ningún bloque corta su texto', async ({ page }) => {
+  // Su semana se revisa a la medida de su teléfono (440 × 956); la semana de ejemplo se revisa en las dos
+  test.skip(test.info().project.name !== '440x956', 'su teléfono es de 440 × 956')
   const suSemana = readFileSync(ruta, 'utf8')
   // En lugar del archivo de ejemplo, la app recibe su semana (solo en esta prueba)
   await page.route(
