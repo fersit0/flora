@@ -24,7 +24,7 @@ Lo que sabemos de cómo usa las herramientas, y que manda sobre cualquier idea d
 ## Las cinco reglas del producto
 
 1. **Abrir es ver.** La app abre directo en el horario. Sin bienvenida, sin menú, sin inicio de sesión.
-2. **Cabe en una pantalla.** El horario completo se ve sin deslizar en su iPhone (440 × 956 puntos). El detalle va adentro de cada bloque, no en la pantalla principal.
+2. **Cabe en una pantalla.** El horario completo se ve sin deslizar en su iPhone 17 Pro (402 × 874 puntos; Fer lo confirmó el 26 nov 2026). El detalle va adentro de cada bloque, no en la pantalla principal.
 3. **Un toque y llegaste.** Tocar un bloque abre una hoja que sube desde abajo. Se cierra y sigues en tu semana. Nunca más de un nivel de profundidad.
 4. **Anotar tan rápido como en WhatsApp.** Un campo siempre visible, escribes, Enter. Y se puede pegar una lista entera tal como ella la escribe.
 5. **Nunca regaña.** Sin rachas, sin atrasos en rojo, sin avisos, sin contadores de pendientes. Si un día no la abre, no pasa nada.
@@ -128,7 +128,7 @@ Pruebas automáticas (si fallan, no se publica):
 
 Pruebas a mano en su teléfono, antes de dársela:
 
-6. Instalada en la pantalla de inicio, abre a pantalla completa y directo en el horario. Aquí se confirma la medida real de su pantalla (se asumió 440 × 956).
+6. Instalada en la pantalla de inicio, abre a pantalla completa y directo en el horario. Aquí se revisa en su pantalla real (iPhone 17 Pro, 402 × 874; al principio se asumió 440 × 956).
 7. Cada liga: abre o se quita.
 8. Agregar un pendiente toma menos de 5 segundos desde que toca el bloque.
 9. El respaldo copiado se puede pegar en WhatsApp y volver a pegar en la app.

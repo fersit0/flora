@@ -156,6 +156,20 @@ textarea {
   display: block;
   flex: none;
 }
+/* El solecito es el botón de ajustes: se ve de 34 px y se toca en 44 × 44 */
+.boton-sol {
+  flex: none;
+  margin: -5px;
+  padding: 5px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+.boton-sol:active {
+  transform: scale(0.92);
+}
 
 /* Días: lun … vie, hoy en pastilla vino */
 .dias {
@@ -443,7 +457,8 @@ html:not(.instalada) .pantalla {
   .hoja,
   .capa-hoja.cerrando .velo,
   .capa-hoja.cerrando .hoja,
-  button.bloque {
+  button.bloque,
+  .boton-sol {
     animation: none;
     transition: none;
   }
@@ -706,4 +721,99 @@ input.renglon-texto {
 }
 .lista-texto:focus {
   border-color: var(--vino-40);
+}
+
+/* ── Pegar su semana o un respaldo ── */
+.primera {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--abajo);
+}
+.primera-contenido {
+  padding: 28px 20px 0;
+}
+.primera-titulo {
+  margin-bottom: 14px;
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 29px;
+  line-height: 1.1;
+}
+.ver-ejemplo {
+  display: block;
+  width: fit-content;
+  margin: 10px auto 0;
+  padding: 12px 8px;
+  text-decoration: none;
+}
+
+.pegar-texto {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: 12px 14px;
+  border: 2px solid var(--vino-16);
+  border-radius: 16px;
+  background: var(--papel);
+  color: var(--vino);
+  font-size: 15px;
+  line-height: 1.4;
+  resize: vertical;
+  outline: none;
+}
+.pegar-texto:focus {
+  border-color: var(--vino-40);
+}
+.pegar-error {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* Botón principal: vino */
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 12px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--vino);
+  color: var(--marfil);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.boton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Ajustes */
+.nota {
+  margin-top: 4px;
+  color: var(--olivo);
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+.nota + .pegar .pegar-texto {
+  margin-top: 10px;
+}
+.nota-lista {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+.enlace-suelto {
+  display: block;
+  margin: 6px 0 0;
+  padding: 12px 0;
 }

@@ -1,25 +1,27 @@
-// Revisa que SU semana real también quepa sin deslizar.
+// Revisa que SU semana real se pueda pegar y que quepa sin deslizar en su teléfono.
 // Solo corre en la compu donde existe privado/ (en GitHub se salta).
 // Su semana se lee al momento de correr: no se escribe aquí ni se toman capturas.
 
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { abrir, revisarQueCabe } from './ayuda'
+import { revisarQueCabe } from './ayuda'
 
 const ruta = join(import.meta.dirname, '..', 'privado', 'semana.json')
 
 test.skip(!existsSync(ruta), 'solo corre donde está la carpeta privado/')
 
-test('su semana real cabe sin deslizar y ningún bloque corta su texto', async ({ page }) => {
-  // Su semana se revisa a la medida de su teléfono (440 × 956); la semana de ejemplo se revisa en las dos
-  test.skip(test.info().project.name !== '440x956', 'su teléfono es de 440 × 956')
-  const suSemana = readFileSync(ruta, 'utf8')
-  // En lugar del archivo de ejemplo, la app recibe su semana (solo en esta prueba)
-  await page.route(
-    (url) => url.pathname.endsWith('/semana-ejemplo.json'),
-    (ruta) => ruta.fulfill({ contentType: 'text/javascript', body: `export default ${JSON.stringify(suSemana)}` }),
-  )
-  await abrir(page, '2026-11-25T12:30:00-06:00')
+// Su teléfono: iPhone 17 Pro (402 × 874). La de ejemplo se revisa en las otras dos medidas.
+test.use({ viewport: { width: 402, height: 874 } })
+
+test('su semana real se pega, cabe sin deslizar y ningún bloque corta su texto', async ({ page }) => {
+  test.skip(test.info().project.name !== '440x956', 'con una vez basta: la medida es la de su teléfono')
+  await page.clock.setFixedTime(new Date('2026-11-25T12:30:00-06:00'))
+  await page.goto('./')
+  // Igual que ella: pega el texto de su semana y toca "listo"
+  await page.getByRole('textbox', { name: 'tu semana' }).fill(readFileSync(ruta, 'utf8'))
+  await page.getByRole('button', { name: 'listo' }).click()
+  await expect(page.locator('.bloque').first()).toBeVisible()
+  await page.evaluate(() => document.fonts.ready)
   await revisarQueCabe(page)
 })

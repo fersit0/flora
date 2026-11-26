@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test'
 
-// Pruebas de pantalla a las dos medidas: su iPhone (440 × 956) y uno más chico (393 × 852).
+// Pruebas de pantalla a dos medidas: un iPhone grande (440 × 956) y uno más chico que el suyo (393 × 852).
+// Su iPhone 17 Pro (402 × 874) queda entre las dos; su semana real se revisa a su medida (su-semana.spec.ts).
 const puerto = 5180
 const telefono = { isMobile: true, hasTouch: true, deviceScaleFactor: 3 }
 

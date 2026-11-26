@@ -1,5 +1,5 @@
-// El solecito con carita: su símbolo. En la fase 3 será el botón de ajustes;
-// por ahora solo se ve. Los rayos van un poco chuecos a propósito, como dibujados a mano.
+// El solecito con carita: su símbolo. En el horario es el botón de ajustes.
+// Los rayos van un poco chuecos a propósito, como dibujados a mano.
 
 const RAYOS: [angulo: number, largo: number][] = [
   [-82, 10], [-55, 11], [-25, 9], [8, 11], [35, 9], [62, 10],

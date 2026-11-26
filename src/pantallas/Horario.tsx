@@ -11,11 +11,13 @@ interface Props {
   semana: Semana
   /** Al tocar un bloque que abre un espacio */
   onAbrir: (espacio: string) => void
+  /** Al tocar el solecito */
+  onAjustes: () => void
   /** Mientras hay una hoja abierta, el horario de atrás no se puede tocar */
   tapado: boolean
 }
 
-export function Horario({ semana, onAbrir, tapado }: Props) {
+export function Horario({ semana, onAbrir, onAjustes, tapado }: Props) {
   const ahora = useAhora()
   const hoy = queDiaEs(ahora)
   const { inicio, fin } = semana.horas
@@ -28,7 +30,10 @@ export function Horario({ semana, onAbrir, tapado }: Props) {
 
       <header className="cabecera">
         <h1>Flora</h1>
-        <Sol />
+        {/* El solecito es el botón de ajustes; no dice "ajustes" */}
+        <button type="button" className="boton-sol" aria-label="ajustes" onClick={onAjustes}>
+          <Sol />
+        </button>
       </header>
 
       <div className="dias">
