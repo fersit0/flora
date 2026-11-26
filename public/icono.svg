@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- El ícono de Flora: el sol con carita sobre fondo vino (lo eligió ella). iOS le redondea las esquinas. -->
+  <rect width="1024" height="1024" fill="#6E1E3B" />
+  <g stroke="#EFC24A" stroke-width="38" stroke-linecap="round">
+    <line x1="512.0" y1="283.0" x2="512.0" y2="216.0" />
+    <line x1="626.5" y1="313.7" x2="660.0" y2="255.7" />
+    <line x1="710.3" y1="397.5" x2="768.3" y2="364.0" />
+    <line x1="741.0" y1="512.0" x2="808.0" y2="512.0" />
+    <line x1="710.3" y1="626.5" x2="768.3" y2="660.0" />
+    <line x1="626.5" y1="710.3" x2="660.0" y2="768.3" />
+    <line x1="512.0" y1="741.0" x2="512.0" y2="808.0" />
+    <line x1="397.5" y1="710.3" x2="364.0" y2="768.3" />
+    <line x1="313.7" y1="626.5" x2="255.7" y2="660.0" />
+    <line x1="283.0" y1="512.0" x2="216.0" y2="512.0" />
+    <line x1="313.7" y1="397.5" x2="255.7" y2="364.0" />
+    <line x1="397.5" y1="313.7" x2="364.0" y2="255.7" />
+  </g>
+  <circle cx="512" cy="512" r="174" fill="#EFC24A" />
+  <circle cx="451" cy="489" r="21" fill="#6E1E3B" />
+  <circle cx="573" cy="489" r="21" fill="#6E1E3B" />
+  <path d="M440 546 Q512 634 584 546" fill="none" stroke="#6E1E3B" stroke-width="16" stroke-linecap="round" />
+  <circle cx="413" cy="542" r="26" fill="#E7A3BE" />
+  <circle cx="611" cy="542" r="26" fill="#E7A3BE" />
+</svg>

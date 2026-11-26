@@ -87,3 +87,16 @@ test('los nombres nunca se parten con guion (Safari lo hacía: "Ve-las")', async
   )
   expect(conGuion).toBe(0)
 })
+
+test('el ícono y la pantalla de arranque están y son imágenes', async ({ page, request }) => {
+  await page.goto('?demo=1')
+  const ligas = await page.$$eval('link[rel="apple-touch-icon"], link[rel="apple-touch-startup-image"], link[rel="icon"]', (ls) =>
+    ls.map((l) => l.getAttribute('href')!),
+  )
+  expect(ligas.length).toBe(5) // ícono, ícono del iPhone y tres pantallas de arranque
+  for (const liga of ligas) {
+    const respuesta = await request.get(liga)
+    expect(respuesta.ok(), liga).toBe(true)
+    expect(respuesta.headers()['content-type'], liga).toMatch(/^image\//)
+  }
+})

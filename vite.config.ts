@@ -23,8 +23,12 @@ export default defineConfig({
         orientation: 'portrait',
         background_color: '#FAF5E6',
         theme_color: '#F7D3E0', // rosa claro de la franja: el color detrás de la hora
-        // El ícono (el sol con carita) entra en la fase 5
-        icons: [],
+        // El sol con carita sobre vino (public/icono.svg; los PNG salen de scripts/iconos.mjs)
+        icons: [
+          { src: 'icono-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icono-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icono-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
