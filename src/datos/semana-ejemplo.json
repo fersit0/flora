@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "titulo": "semana de ejemplo",
+  "horas": { "inicio": 8, "fin": 22 },
+  "espacios": [
+    { "id": "agencia", "nombre": "Agencia Nube", "emoji": "💼", "color": "pistache", "tipo": "pendientes" },
+    { "id": "velas", "nombre": "Velas Marea", "emoji": "🕯️", "color": "rosa", "tipo": "cliente" },
+    { "id": "cafe", "nombre": "Café Lirio", "emoji": "☕", "color": "sol", "tipo": "cliente" },
+    { "id": "ideas", "nombre": "ideas", "emoji": "💡", "color": "vino", "tipo": "ideas" }
+  ],
+  "ligas": { "planeador": "", "correo": "" },
+  "dias": {
+    "lun": [
+      { "de": 8, "a": 9, "color": "papel", "emoji": "🚶‍♀️", "nombre": "caminar", "nombreLargo": "caminar", "detalle": "por el parque", "abre": null },
+      { "de": 9, "a": 13, "color": "pistache", "emoji": "💼", "nombre": "Agencia", "nombreLargo": "Agencia Nube", "detalle": "diseño de campañas", "abre": { "espacio": "agencia" } },
+      { "de": 13, "a": 14, "color": "papel", "emoji": "🥗", "nombre": "comida", "nombreLargo": "comida", "detalle": "", "abre": { "comida": "comida" } },
+      { "de": 14, "a": 17, "color": "pistache", "emoji": "💼", "nombre": "Agencia", "nombreLargo": "Agencia Nube", "detalle": "juntas con clientes", "abre": { "espacio": "agencia" } },
+      { "de": 17, "a": 19, "color": "rosa", "emoji": "🕯️", "nombre": "grabar Velas", "nombreLargo": "grabar para Velas Marea", "detalle": "", "abre": { "espacio": "velas" } },
+      { "de": 20, "a": 21, "color": "papel", "emoji": "🍲", "nombre": "cena", "nombreLargo": "cena", "detalle": "", "abre": { "comida": "cena" } }
+    ],
+    "mar": [
+      { "de": 9, "a": 10, "color": "papel", "emoji": "🥐", "nombre": "desayuno", "nombreLargo": "desayuno", "detalle": "", "abre": { "comida": "desayuno" } },
+      { "de": 10, "a": 13, "color": "vino", "emoji": "✨", "nombre": "crear lo mío", "nombreLargo": "crear mi contenido", "detalle": "fotos y reels", "abre": { "liga": "planeador" } },
+      { "de": 13, "a": 14, "color": "papel", "emoji": "🥗", "nombre": "comida", "nombreLargo": "comida", "detalle": "", "abre": { "comida": "comida" } },
+      { "de": 15, "a": 18, "color": "sol", "emoji": "☕", "nombre": "Café Lirio", "nombreLargo": "Café Lirio", "detalle": "fotos del menú nuevo", "abre": { "espacio": "cafe" } },
+      { "de": 19, "a": 20, "color": "papel", "emoji": "🍲", "nombre": "cena", "nombreLargo": "cena", "detalle": "", "abre": { "comida": "cena" } },
+      { "de": 20, "a": 21, "color": "papel", "emoji": "💃", "nombre": "baile", "nombreLargo": "clase de baile", "detalle": "salsa con mi prima", "abre": null }
+    ],
+    "mié": [
+      { "de": 8, "a": 9, "color": "papel", "emoji": "🚶‍♀️", "nombre": "caminar", "nombreLargo": "caminar", "detalle": "", "abre": null },
+      { "de": 9, "a": 13, "color": "pistache", "emoji": "💼", "nombre": "Agencia", "nombreLargo": "Agencia Nube", "detalle": "diseño de campañas", "abre": { "espacio": "agencia" } },
+      { "de": 13, "a": 14, "color": "papel", "emoji": "🥗", "nombre": "comida", "nombreLargo": "comida", "detalle": "", "abre": { "comida": "comida" } },
+      { "de": 15, "a": 17, "color": "rosa", "emoji": "✂️", "nombre": "editar Velas", "nombreLargo": "editar para Velas Marea", "detalle": "los dos videos de la semana", "abre": { "espacio": "velas" } },
+      { "de": 17, "a": 18, "color": "vino", "emoji": "💌", "nombre": "correos", "nombreLargo": "contestar correos", "detalle": "", "abre": { "liga": "correo" } },
+      { "de": 20, "a": 21, "color": "papel", "emoji": "🍲", "nombre": "cena", "nombreLargo": "cena", "detalle": "", "abre": { "comida": "cena" } }
+    ],
+    "jue": [
+      { "de": 9, "a": 10, "color": "papel", "emoji": "🥐", "nombre": "desayuno", "nombreLargo": "desayuno", "detalle": "", "abre": { "comida": "desayuno" } },
+      { "de": 10, "a": 13, "color": "pistache", "emoji": "💼", "nombre": "Agencia", "nombreLargo": "Agencia Nube", "detalle": "", "abre": { "espacio": "agencia" } },
+      { "de": 13, "a": 14, "color": "papel", "emoji": "🥗", "nombre": "comida", "nombreLargo": "comida", "detalle": "", "abre": { "comida": "comida" } },
+      { "de": 14, "a": 17, "color": "pistache", "emoji": "💼", "nombre": "Agencia", "nombreLargo": "Agencia Nube", "detalle": "reporte de la semana", "abre": { "espacio": "agencia" } },
+      { "de": 18, "a": 20, "color": "sol", "emoji": "📷", "nombre": "fotos Café", "nombreLargo": "fotos para Café Lirio", "detalle": "las del local", "abre": { "espacio": "cafe" } },
+      { "de": 20, "a": 21, "color": "papel", "emoji": "🍲", "nombre": "cena", "nombreLargo": "cena", "detalle": "", "abre": { "comida": "cena" } }
+    ],
+    "vie": [
+      { "de": 9, "a": 10, "color": "papel", "emoji": "🥐", "nombre": "desayuno", "nombreLargo": "desayuno", "detalle": "", "abre": { "comida": "desayuno" } },
+      { "de": 10, "a": 12, "color": "vino", "emoji": "💡", "nombre": "anotar ideas", "nombreLargo": "anotar ideas", "detalle": "para lo que creo el martes", "abre": { "espacio": "ideas" } },
+      { "de": 12, "a": 13, "color": "rosa", "emoji": "📦", "nombre": "entrega", "nombreLargo": "entrega a Velas Marea", "detalle": "mandar los videos", "abre": { "espacio": "velas" } },
+      { "de": 13, "a": 14, "color": "papel", "emoji": "🥗", "nombre": "comida", "nombreLargo": "comida", "detalle": "", "abre": { "comida": "comida" } },
+      { "de": 15, "a": 17, "color": "vino", "emoji": "📲", "nombre": "subir videos", "nombreLargo": "subir mis videos", "detalle": "", "abre": { "liga": "planeador" } },
+      { "de": 17, "a": 19, "color": "rayado", "emoji": "🧷", "nombre": "lo suelto", "nombreLargo": "lo suelto de la semana", "detalle": "lo que no alcancé", "abre": null }
+    ]
+  },
+  "finde": {
+    "sab": { "corto": "mercado 🍓", "largo": "mercado en la mañana y comida con amigas 🍓" },
+    "dom": { "corto": "descanso 🌙", "largo": "descanso: series y ropa limpia 🌙" }
+  },
+  "porCadaCosa": [
+    { "color": "pistache", "emoji": "💼", "nombre": "Agencia Nube", "texto": "lunes a jueves en la oficina; el viernes no hay juntas." },
+    { "color": "rosa", "emoji": "🕯️", "nombre": "Velas Marea", "texto": "lunes grabo, miércoles edito, viernes entrego." },
+    { "color": "sol", "emoji": "☕", "nombre": "Café Lirio", "texto": "martes fotos del menú, jueves las del local." },
+    { "color": "vino", "emoji": "💡", "nombre": "ideas", "texto": "viernes anoto, martes creo." }
+  ],
+  "dormir": "10:30 pm, luces fuera."
+}

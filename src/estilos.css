@@ -1,0 +1,352 @@
+/* Flora: todos los estilos y variables en este archivo. Los valores salen de DISENO.md. */
+
+/* ── Letras: van dentro de la app para que funcione sin internet ── */
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./fuentes/lora-latin-600-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fuentes/dm-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./fuentes/dm-sans-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./fuentes/dm-sans-latin-700-normal.woff2') format('woff2');
+}
+
+/* ── Variables ── */
+:root {
+  /* Colores: cada uno significa una responsabilidad */
+  --vino: #6e1e3b;
+  --rosa: #e7a3be;
+  --rosa-claro: #f7d3e0;
+  --pistache: #cdd88f;
+  --olivo: #66742f;
+  --mantequilla: #f3e0a0;
+  --sol: #efc24a;
+  --marfil: #faf5e6;
+  --papel: #fffdf6;
+
+  /* Texto sobre cada color (ya revisado que se lee) */
+  --texto-pistache: #3c4619;
+  --texto-rosa: #57152e;
+  --texto-sol: #553c00;
+
+  /* Transparencias */
+  --vino-22: rgb(110 30 59 / 0.22);
+  --vino-16: rgb(110 30 59 / 0.16);
+  --vino-40: rgb(110 30 59 / 0.4);
+  --vino-06: rgb(110 30 59 / 0.06);
+  --rosa-55: rgb(231 163 190 / 0.55);
+  --mantequilla-55: rgb(243 224 160 / 0.55);
+
+  /* Letras */
+  --titulos: 'Lora', Georgia, serif;
+  --letra: 'DM Sans', -apple-system, system-ui, sans-serif;
+
+  /* Medidas de la pantalla principal */
+  --franja: max(56px, env(safe-area-inset-top)); /* zona de la hora y la isla */
+  --abajo: max(30px, env(safe-area-inset-bottom)); /* indicador de inicio */
+  --margen-horas: 34px;
+  --margen-der: 10px;
+  --entre-columnas: 4px;
+  --entre-bloques: 3px;
+
+  color-scheme: light;
+}
+
+/* ── Base ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--marfil);
+  color: var(--vino);
+  font-family: var(--letra);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+h1,
+h2,
+p {
+  margin: 0;
+  font-size: inherit;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ── Pantalla principal: cabe completa, sin deslizar ── */
+.pantalla {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--abajo);
+}
+
+/* Franja vichy: lo único decorado */
+.franja {
+  flex: none;
+  height: var(--franja);
+  background-color: var(--rosa-claro);
+  background-image:
+    linear-gradient(90deg, var(--rosa-55) 50%, transparent 50%),
+    linear-gradient(var(--rosa-55) 50%, transparent 50%);
+  background-size: 40px 40px;
+}
+
+.cabecera {
+  flex: none;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px 0 14px;
+}
+.cabecera h1 {
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 31px;
+  line-height: 1;
+}
+.sol {
+  display: block;
+  flex: none;
+}
+
+/* Días: lun … vie, hoy en pastilla vino */
+.dias {
+  flex: none;
+  height: 24px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--entre-columnas);
+  padding: 0 var(--margen-der) 0 var(--margen-horas);
+}
+.dia {
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 999px;
+}
+.dia.hoy {
+  background: var(--vino);
+  color: var(--marfil);
+}
+
+/* Cuadrícula: llena el alto que quede; el alto de cada hora se calcula solo */
+.cuadricula {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  margin: 8px var(--margen-der) 0 var(--margen-horas);
+}
+.linea-hora {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dotted var(--vino-16);
+}
+.hora {
+  position: absolute;
+  top: 0;
+  left: calc(-1 * var(--margen-horas));
+  width: calc(var(--margen-horas) - 2px);
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--olivo);
+}
+.columnas {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--entre-columnas);
+}
+.columna {
+  position: relative;
+  min-width: 0;
+}
+/* Columna de hoy: mantequilla al 55% detrás de los bloques */
+.columna.hoy::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -4px;
+  left: -2px;
+  right: -2px;
+  background: var(--mantequilla-55);
+  border-radius: 10px;
+}
+
+/* Bloque: emoji arriba y nombre abajo */
+.bloque {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--arriba) + var(--entre-bloques) / 2);
+  height: calc(var(--alto) - var(--entre-bloques));
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  overflow: hidden;
+}
+.bloque .emoji {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.bloque .nombre {
+  max-width: 100%;
+  font-size: 11.2px;
+  font-weight: 700;
+  line-height: 1.12;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.color-vino {
+  background: var(--vino);
+  color: var(--marfil);
+}
+.color-rosa {
+  background: var(--rosa);
+  color: var(--texto-rosa);
+}
+.color-pistache {
+  background: var(--pistache);
+  color: var(--texto-pistache);
+}
+.color-sol {
+  background: var(--sol);
+  color: var(--texto-sol);
+}
+/* "Para mí": papel con borde fino vino al 22% */
+.color-papel {
+  background: var(--papel);
+  color: var(--vino);
+  border-color: var(--vino-22);
+}
+/* Pendientes sueltos: transparente, con borde y rayas diagonales muy suaves */
+.color-rayado {
+  background: repeating-linear-gradient(135deg, var(--vino-06) 0 6px, transparent 6px 12px);
+  color: var(--vino);
+  border-color: var(--vino-40);
+}
+
+/* Línea de ahora: 2 px vino con un punto a la izquierda */
+.ahora {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--vino);
+  z-index: 1;
+  pointer-events: none;
+}
+.ahora::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vino);
+}
+
+/* Sábado y domingo */
+.finde {
+  flex: none;
+  height: 50px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin: 10px var(--margen-der) 0;
+}
+.finde-dia {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 13px;
+  background: var(--mantequilla);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  overflow: hidden;
+}
+/* En fin de semana no hay columna de hoy: se resalta el recuadro */
+.finde-dia.hoy {
+  border-color: var(--vino);
+}
+.finde-dia h2 {
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.1;
+}
+.finde-dia p {
+  font-size: 11.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Aviso discreto de versión nueva */
+.aviso-version {
+  position: fixed;
+  top: calc(var(--franja) + 11px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vino);
+  color: var(--marfil);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
