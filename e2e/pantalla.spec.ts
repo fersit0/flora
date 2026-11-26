@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, revisarQueCabe } from './ayuda'
+import { abrir, revisarQueCabe, revisarQueNoHayRojo } from './ayuda'
 
 // Fechas de prueba (noviembre 2026, hora de CDMX)
 const MIERCOLES_MEDIODIA = '2026-11-25T12:30:00-06:00'
@@ -77,16 +77,13 @@ test('domingo: se resalta el recuadro del domingo', async ({ page }) => {
 
 test('nada regaña: sin rojo en la pantalla', async ({ page }) => {
   await abrir(page, MIERCOLES_MEDIODIA)
-  const rojos = await page.$$eval('*', (els) =>
-    els
-      .map((e) => getComputedStyle(e))
-      .flatMap((s) => [s.color, s.backgroundColor, s.borderTopColor])
-      .filter((c) => {
-        const m = c.match(/\d+(\.\d+)?/g)
-        if (!m) return false
-        const [r, g, b] = m.map(Number)
-        return r > 180 && g < 80 && b < 80
-      }),
+  await revisarQueNoHayRojo(page)
+})
+
+test('los nombres nunca se parten con guion (Safari lo hacía: "Ve-las")', async ({ page }) => {
+  await abrir(page, MIERCOLES_MEDIODIA)
+  const conGuion = await page.$$eval('.bloque .nombre', (nombres) =>
+    nombres.filter((n) => getComputedStyle(n).hyphens === 'auto').length,
   )
-  expect(rojos).toEqual([])
+  expect(conGuion).toBe(0)
 })

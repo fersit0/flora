@@ -67,6 +67,12 @@
   --margen-der: 10px;
   --entre-columnas: 4px;
   --entre-bloques: 3px;
+  --hora-minima: 44px; /* lo menos que mide una hora para que quepan el emoji y el nombre */
+
+  /* Hojas */
+  --velo: rgb(58 14 31 / 0.38); /* vino oscuro al 38% */
+  --vino-50: rgb(110 30 59 / 0.5);
+  --hoja-arriba: calc(var(--franja) + 94px); /* deja ver la cabecera, los días y un pedazo del horario */
 
   color-scheme: light;
 }
@@ -93,13 +99,22 @@ body {
 }
 h1,
 h2,
+h3,
+h4,
 p {
   margin: 0;
   font-size: inherit;
+  font-weight: inherit;
 }
-button {
+button,
+input,
+textarea {
   font: inherit;
   color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--vino);
+  outline-offset: 2px;
 }
 
 /* ── Pantalla principal: cabe completa, sin deslizar ── */
@@ -229,6 +244,18 @@ button {
   align-items: flex-start;
   gap: 1px;
   overflow: hidden;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+button.bloque {
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+button.bloque:active {
+  transform: scale(0.96);
 }
 .bloque .emoji {
   font-size: 14px;
@@ -240,7 +267,7 @@ button {
   font-weight: 700;
   line-height: 1.12;
   overflow-wrap: break-word;
-  hyphens: auto;
+  hyphens: manual; /* sin guiones: Safari partía "Ve-las" */
 }
 .color-vino {
   background: var(--vino);
@@ -349,4 +376,334 @@ button {
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* ── Hojas: suben desde abajo ── */
+.capa-hoja {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+/* En Safari sin instalar (con sus barras) a veces no alcanza el alto:
+   entonces la página se desliza un poco en vez de cortar los nombres.
+   Instalada nunca se desliza (la prueba "cabe sin deslizar" lo revisa). */
+html:not(.instalada) .pantalla {
+  min-height: calc(var(--franja) + 142px + var(--abajo) + var(--horas, 14) * var(--hora-minima));
+}
+.velo {
+  position: absolute;
+  inset: 0;
+  background: var(--velo);
+  cursor: pointer; /* sin esto, el iPhone no avisa del toque en un div */
+  animation: aparecer 200ms ease-out;
+}
+.hoja {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--hoja-arriba);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--marfil);
+  border-radius: 28px 28px 0 0;
+  outline: none;
+  animation: subir 200ms ease-out;
+  transition: transform 200ms ease-out;
+}
+.capa-hoja.cerrando .velo {
+  animation: desaparecer 200ms ease-in forwards;
+}
+.capa-hoja.cerrando .hoja {
+  animation: bajar 200ms ease-in forwards;
+}
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes bajar {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes desaparecer {
+  to {
+    opacity: 0;
+  }
+}
+/* Si el teléfono pide menos movimiento, aparece sin animación */
+@media (prefers-reduced-motion: reduce) {
+  .velo,
+  .hoja,
+  .capa-hoja.cerrando .velo,
+  .capa-hoja.cerrando .hoja,
+  button.bloque {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* El asa y el título: de aquí se jala hacia abajo */
+.hoja-agarre {
+  flex: none;
+  padding: 0 20px 6px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.asa {
+  width: 44px;
+  height: 5px;
+  margin: 10px auto 16px;
+  border-radius: 3px;
+  background: var(--vino-22);
+}
+.hoja-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hoja-cabecera h2 {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 29px;
+  line-height: 1.1;
+}
+.hoja-emoji {
+  margin-right: 8px;
+  font-style: normal;
+}
+/* La pastilla dice en qué días toca, con su color */
+.pastilla {
+  flex: none;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hoja-resumen {
+  margin-top: 8px;
+  color: var(--olivo);
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+
+/* Adentro de la hoja sí se desliza si la lista es larga */
+.hoja-contenido {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px max(24px, env(safe-area-inset-bottom));
+}
+
+.seccion {
+  margin-top: 20px;
+}
+.seccion-cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.seccion-titulo {
+  margin-bottom: 4px;
+  font-family: var(--titulos);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.acciones {
+  color: var(--olivo);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* Botones de texto: editar, copiar, borrar, ya la usé */
+.enlace {
+  margin: -12px 0;
+  padding: 12px 2px;
+  border: 0;
+  background: none;
+  color: var(--olivo);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.renglones {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.renglon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-bottom: 1px dotted var(--vino-22);
+  font-size: 15.5px;
+  line-height: 1.3;
+}
+/* El círculo se ve de 22 px, pero se puede tocar en 44 × 44 */
+.circulo {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: 0 -4px 0 -11px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.circulo-dibujo {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--vino-40);
+  border-radius: 50%;
+}
+.circulo-dibujo svg {
+  width: 16px;
+  height: 16px;
+}
+/* Lo hecho: círculo relleno vino y el texto tachado a media opacidad */
+.renglon.hecho .circulo-dibujo {
+  background: var(--vino);
+  border-color: var(--vino);
+}
+.renglon-texto {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 0;
+  border: 0;
+  background: none;
+  color: var(--vino);
+  font-size: 15.5px;
+  line-height: 1.3;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+button.renglon-texto {
+  cursor: text;
+}
+input.renglon-texto {
+  outline: none;
+}
+.renglon.hecho .renglon-texto,
+.renglon.usada .renglon-texto {
+  opacity: 0.5;
+}
+.renglon.hecho .renglon-texto {
+  text-decoration: line-through;
+}
+.fecha {
+  flex: none;
+  color: var(--olivo);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.renglon.idea {
+  gap: 12px;
+}
+.renglon.idea .enlace {
+  flex: none;
+  font-size: 13px;
+}
+
+.vacio {
+  padding: 10px 0;
+  color: var(--olivo);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* El campo para agregar: siempre a la vista, aunque la lista sea larga */
+.agregar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 10px 0;
+  background: var(--marfil);
+}
+.seccion-ideas .agregar {
+  top: 0;
+  bottom: auto;
+}
+.agregar input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  padding: 0 16px;
+  border: 2px solid var(--vino-16);
+  border-radius: 16px;
+  background: var(--papel);
+  color: var(--vino);
+  font-size: 15px;
+  outline: none;
+}
+.agregar input:focus {
+  border-color: var(--vino-40);
+}
+.agregar input::placeholder {
+  color: var(--vino-50);
+  opacity: 1;
+}
+
+.sub {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.sub h4 {
+  color: var(--olivo);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+/* La lista de contenidos, dibujada desde su texto */
+.lista-titulo {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.lista-semana {
+  margin-top: 14px;
+  color: var(--olivo);
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.lista-texto {
+  display: block;
+  width: 100%;
+  min-height: 320px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 2px solid var(--vino-16);
+  border-radius: 16px;
+  background: var(--papel);
+  color: var(--vino);
+  font-size: 15px;
+  line-height: 1.45;
+  resize: vertical;
+  outline: none;
+}
+.lista-texto:focus {
+  border-color: var(--vino-40);
 }

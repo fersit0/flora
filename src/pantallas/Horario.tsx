@@ -7,7 +7,15 @@ import { useAhora } from '../componentes/useAhora'
 import { DIAS, type Bloque, type Semana } from '../logic/semana'
 import { etiquetaHora, horaDecimal, lineaAhora, posicion, queDiaEs } from '../logic/tiempo'
 
-export function Horario({ semana }: { semana: Semana }) {
+interface Props {
+  semana: Semana
+  /** Al tocar un bloque que abre un espacio */
+  onAbrir: (espacio: string) => void
+  /** Mientras hay una hoja abierta, el horario de atrás no se puede tocar */
+  tapado: boolean
+}
+
+export function Horario({ semana, onAbrir, tapado }: Props) {
   const ahora = useAhora()
   const hoy = queDiaEs(ahora)
   const { inicio, fin } = semana.horas
@@ -15,7 +23,7 @@ export function Horario({ semana }: { semana: Semana }) {
   const linea = lineaAhora(horaDecimal(ahora), inicio, fin)
 
   return (
-    <main className="pantalla">
+    <main className="pantalla" inert={tapado} style={{ '--horas': fin - inicio } as CSSProperties}>
       <div className="franja" aria-hidden="true" />
 
       <header className="cabecera">
@@ -47,7 +55,7 @@ export function Horario({ semana }: { semana: Semana }) {
             return (
               <div key={dia} className={esHoy ? 'columna hoy' : 'columna'} data-dia={dia}>
                 {semana.dias[dia].map((b) => (
-                  <BloqueHorario key={`${b.de}-${b.nombre}`} bloque={b} inicio={inicio} fin={fin} />
+                  <BloqueHorario key={`${b.de}-${b.nombre}`} bloque={b} inicio={inicio} fin={fin} onAbrir={onAbrir} />
                 ))}
                 {esHoy && linea !== null && <div className="ahora" style={{ top: `${linea}%` }} />}
               </div>
@@ -70,13 +78,37 @@ export function Horario({ semana }: { semana: Semana }) {
   )
 }
 
-function BloqueHorario({ bloque, inicio, fin }: { bloque: Bloque; inicio: number; fin: number }) {
+interface PropsBloque {
+  bloque: Bloque
+  inicio: number
+  fin: number
+  onAbrir: (espacio: string) => void
+}
+
+function BloqueHorario({ bloque, inicio, fin, onAbrir }: PropsBloque) {
   const { arriba, alto } = posicion(bloque.de, bloque.a, inicio, fin)
   const estilo = { '--arriba': `${arriba}%`, '--alto': `${alto}%` } as CSSProperties
-  return (
-    <div className={`bloque color-${bloque.color}`} style={estilo}>
+  const clase = `bloque color-${bloque.color}`
+  const contenido = (
+    <>
       {bloque.emoji && <span className="emoji">{bloque.emoji}</span>}
       <span className="nombre">{bloque.nombre}</span>
+    </>
+  )
+
+  // Solo es botón si abre algo. Las ligas llegan en la fase 4 y las comidas después;
+  // mientras, esos bloques no son botones (nunca un botón que no hace nada).
+  const espacio = bloque.abre && 'espacio' in bloque.abre ? bloque.abre.espacio : null
+  if (espacio) {
+    return (
+      <button type="button" className={clase} style={estilo} onClick={() => onAbrir(espacio)}>
+        {contenido}
+      </button>
+    )
+  }
+  return (
+    <div className={clase} style={estilo}>
+      {contenido}
     </div>
   )
 }

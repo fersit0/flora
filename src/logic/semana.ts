@@ -235,3 +235,15 @@ function leerFinde(x: unknown, dia: string): TextoFinde {
   const corto = texto(x.corto, `el ${dia}`, true)
   return { corto, largo: texto(x.largo, `el ${dia}`, true) || corto }
 }
+
+/** Los días en que algún bloque abre ese espacio, en orden de lunes a viernes. */
+export function diasDeEspacio(semana: Semana, id: string): Dia[] {
+  return DIAS.filter((dia) =>
+    semana.dias[dia].some((b) => b.abre !== null && 'espacio' in b.abre && b.abre.espacio === id),
+  )
+}
+
+/** La línea "por cada cosa" de ese espacio (va bajo el título de su hoja), o '' si no tiene. */
+export function resumenDeEspacio(semana: Semana, espacio: Espacio): string {
+  return semana.porCadaCosa.find((r) => r.nombre === espacio.nombre)?.texto ?? ''
+}

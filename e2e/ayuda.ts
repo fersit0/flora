@@ -74,3 +74,52 @@ export async function revisarQueCabe(page: Page) {
   })
   expect(cortados, 'hay textos cortados').toEqual([])
 }
+
+/** Regla 5: nada regaña. Ningún texto, fondo ni borde rojo en lo que se ve. */
+export async function revisarQueNoHayRojo(page: Page) {
+  const rojos = await page.$$eval('*', (els) =>
+    els
+      .map((e) => getComputedStyle(e))
+      .flatMap((s) => [s.color, s.backgroundColor, s.borderTopColor])
+      .filter((c) => {
+        const m = c.match(/\d+(\.\d+)?/g)
+        if (!m) return false
+        const [r, g, b] = m.map(Number)
+        return r > 180 && g < 80 && b < 80
+      }),
+  )
+  expect(rojos, 'hay algo rojo en la pantalla').toEqual([])
+}
+
+/** Toca el bloque con ese nombre y espera a que su hoja termine de subir. */
+export async function abrirHoja(page: Page, bloque: string) {
+  await page.getByRole('button', { name: bloque }).first().click()
+  const hoja = page.getByRole('dialog')
+  await expect(hoja).toBeVisible()
+  await page.waitForTimeout(250) // lo que dura la animación
+  return hoja
+}
+
+/** Espera a que lo que se ve ya esté guardado en el teléfono (IndexedDB del ejemplo). */
+export async function esperarGuardado(page: Page, espacio: string, contiene: string) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          (id) =>
+            new Promise<string>((listo) => {
+              const abrir = indexedDB.open('flora-ejemplo')
+              abrir.onsuccess = () => {
+                const leer = abrir.result.transaction('espacios').objectStore('espacios').get(id)
+                leer.onsuccess = () => {
+                  listo(JSON.stringify(leer.result ?? null))
+                  abrir.result.close()
+                }
+              }
+            }),
+          espacio,
+        ),
+      { message: 'no se terminó de guardar' },
+    )
+    .toContain(contiene)
+}

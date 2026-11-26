@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import ejemplo from '../datos/semana-ejemplo.json?raw'
-import { DIAS, leerSemana, type Semana } from './semana'
+import { DIAS, diasDeEspacio, leerSemana, resumenDeEspacio, type Semana } from './semana'
 
 function lee(texto: string): Semana {
   const r = leerSemana(texto)
@@ -92,5 +92,22 @@ describe('pegar datos malos no rompe nada', () => {
 
   it.each(['', 'hola', '{', '[]', 'null', '42', '"texto"'])('rechaza texto que no es una semana: %j', (texto) => {
     expect(leerSemana(texto).ok).toBe(false)
+  })
+})
+
+describe('lo que va en la hoja de cada espacio', () => {
+  it('los días en que toca cada espacio, de lunes a viernes', () => {
+    const s = lee(ejemplo)
+    expect(diasDeEspacio(s, 'velas')).toEqual(['lun', 'mié', 'vie'])
+    expect(diasDeEspacio(s, 'cafe')).toEqual(['mar', 'jue'])
+    expect(diasDeEspacio(s, 'ideas')).toEqual(['vie'])
+    expect(diasDeEspacio(s, 'otro')).toEqual([])
+  })
+
+  it('la línea "por cada cosa" de cada espacio', () => {
+    const s = lee(ejemplo)
+    const velas = s.espacios.find((e) => e.id === 'velas')!
+    expect(resumenDeEspacio(s, velas)).toBe('lunes grabo, miércoles edito, viernes entrego.')
+    expect(resumenDeEspacio({ ...s, porCadaCosa: [] }, velas)).toBe('')
   })
 })

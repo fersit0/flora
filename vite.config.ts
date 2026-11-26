@@ -22,7 +22,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#FAF5E6',
-        theme_color: '#FAF5E6',
+        theme_color: '#F7D3E0', // rosa claro de la franja: el color detrás de la hora
         // El ícono (el sol con carita) entra en la fase 5
         icons: [],
       },
