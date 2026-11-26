@@ -1,0 +1,14 @@
+# Lo personal nunca se sube
+privado/
+
+node_modules/
+dist/
+dev-dist/
+.DS_Store
+*.local
+test-results/
+playwright-report/
+
+# Ajustes locales de las herramientas de IA
+.claude/
+*.tsbuildinfo
