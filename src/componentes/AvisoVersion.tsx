@@ -21,7 +21,7 @@ export function AvisoVersion() {
   if (!hayNueva) return null
   return (
     <button type="button" className="aviso-version" onClick={() => updateServiceWorker(true)}>
-      algo nuevo · toca aquí
+      <span>algo nuevo · toca aquí</span>
     </button>
   )
 }
