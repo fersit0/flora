@@ -19,6 +19,12 @@ const LO_HECHO = '.renglon.hecho .renglon-texto, .renglon.usada .renglon-texto'
 const BLOQUES = '.bloque'
 
 async function revisarTodo(page: Page) {
+  // La estrella ☆ es su signo: una por pantalla, máximo
+  const estrellas = await page.evaluate(() => {
+    const capa = document.querySelector('.hoja') ?? document.body
+    return ((capa as HTMLElement).innerText.match(/☆/g) ?? []).length
+  })
+  expect(estrellas, 'más de una estrella').toBeLessThanOrEqual(1)
   await revisarQueNoSeMueveDeLado(page)
   await revisarQueSeLee(page, { aparte: LO_HECHO })
   await revisarQueSeToca(page, { aparte: BLOQUES })

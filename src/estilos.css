@@ -60,6 +60,24 @@
   --titulos: 'Lora', Georgia, serif;
   --letra: 'DM Sans', -apple-system, system-ui, sans-serif;
 
+  /* Una sola escala de tamaños (los de DISENO.md, y dos chicos para lo secundario) */
+  --letra-flora: 31px; /* "Flora" */
+  --letra-titulo: 29px; /* título de cada hoja */
+  --letra-seccion: 20px; /* secciones de una hoja */
+  --letra-renglon: 15.5px; /* renglones de las hojas */
+  --letra-texto: 15px; /* campos, botones, días y el texto de siempre */
+  --letra-chica: 14.5px; /* texto secundario: resúmenes, fechas, notas, editar · copiar */
+  --letra-mini: 13px; /* la pastilla de los días, "ya la usé", el aviso de versión */
+  --letra-emoji: 14px; /* emoji del bloque */
+  --letra-finde: 11.5px; /* texto corto de sábado y domingo */
+  --letra-bloque: 11.2px; /* nombre del bloque */
+  --letra-hora: 10.5px; /* horas */
+
+  /* Espacios y formas que se repiten */
+  --margen-hoja: 20px; /* a los lados dentro de las hojas */
+  --redondo: 16px; /* campos, botones y sábado y domingo */
+  --alto-control: 46px; /* campos y botones */
+
   /* Medidas de la pantalla principal */
   --franja: max(56px, env(safe-area-inset-top)); /* zona de la hora y la isla */
   --abajo: max(30px, env(safe-area-inset-bottom)); /* indicador de inicio */
@@ -154,7 +172,7 @@ html.corta {
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 31px;
+  font-size: var(--letra-flora);
   line-height: 1;
 }
 .sol {
@@ -189,7 +207,7 @@ html.corta {
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 24px;
   text-align: center;
   border-radius: 999px;
@@ -220,7 +238,7 @@ html.corta {
   width: calc(var(--margen-horas) - 2px);
   transform: translateY(-50%);
   text-align: center;
-  font-size: 10.5px;
+  font-size: var(--letra-hora);
   font-weight: 600;
   line-height: 1;
   color: var(--olivo);
@@ -281,12 +299,12 @@ a.bloque:active {
   transform: scale(0.96);
 }
 .bloque .emoji {
-  font-size: 14px;
+  font-size: var(--letra-emoji);
   line-height: 1.2;
 }
 .bloque .nombre {
   max-width: 100%;
-  font-size: 11.2px;
+  font-size: var(--letra-bloque);
   font-weight: 700;
   line-height: 1.12;
   overflow-wrap: break-word;
@@ -363,7 +381,7 @@ a.bloque:active {
   padding: 0 13px;
   background: var(--mantequilla);
   border: 2px solid transparent;
-  border-radius: 16px;
+  border-radius: var(--redondo);
   overflow: hidden;
   font: inherit;
   text-align: left;
@@ -387,12 +405,12 @@ button.finde-dia:active {
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 1.1;
 }
 .finde-corto {
   display: block;
-  font-size: 11.5px;
+  font-size: var(--letra-finde);
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -420,7 +438,7 @@ button.finde-dia:active {
   border-radius: 999px;
   background: var(--vino);
   color: var(--marfil);
-  font-size: 12.5px;
+  font-size: var(--letra-mini);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -511,7 +529,7 @@ html.con-hoja:not(.instalada) .pantalla {
 /* El asa y el título: de aquí se jala hacia abajo */
 .hoja-agarre {
   flex: none;
-  padding: 0 20px 6px;
+  padding: 0 var(--margen-hoja) 6px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -534,7 +552,7 @@ html.con-hoja:not(.instalada) .pantalla {
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 29px;
+  font-size: var(--letra-titulo);
   line-height: 1.1;
 }
 .hoja-emoji {
@@ -546,20 +564,20 @@ html.con-hoja:not(.instalada) .pantalla {
   flex: none;
   padding: 5px 12px;
   border-radius: 999px;
-  font-size: 13.5px;
+  font-size: var(--letra-mini);
   font-weight: 600;
   white-space: nowrap;
 }
 .hoja-detalle {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   font-weight: 600;
   line-height: 1.35;
 }
 .hoja-resumen {
   margin-top: 8px;
   color: var(--olivo);
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   line-height: 1.35;
 }
 
@@ -570,7 +588,7 @@ html.con-hoja:not(.instalada) .pantalla {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 0 20px max(24px, env(safe-area-inset-bottom));
+  padding: 0 var(--margen-hoja) max(24px, env(safe-area-inset-bottom));
 }
 
 .seccion {
@@ -587,12 +605,12 @@ html.con-hoja:not(.instalada) .pantalla {
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--letra-seccion);
   line-height: 1.2;
 }
 .acciones {
   color: var(--olivo);
-  font-size: 14px;
+  font-size: var(--letra-chica);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -604,7 +622,7 @@ html.con-hoja:not(.instalada) .pantalla {
   border: 0;
   background: none;
   color: var(--olivo);
-  font-size: 14px;
+  font-size: var(--letra-chica);
   font-weight: 600;
   cursor: pointer;
 }
@@ -620,7 +638,7 @@ html.con-hoja:not(.instalada) .pantalla {
   gap: 8px;
   min-height: 44px;
   border-bottom: 1px dotted var(--vino-22);
-  font-size: 15.5px;
+  font-size: var(--letra-renglon);
   line-height: 1.3;
 }
 /* El círculo se ve de 22 px, pero se puede tocar en 44 × 44 */
@@ -660,7 +678,7 @@ html.con-hoja:not(.instalada) .pantalla {
   border: 0;
   background: none;
   color: var(--vino);
-  font-size: 15.5px;
+  font-size: var(--letra-renglon);
   line-height: 1.3;
   text-align: left;
   overflow-wrap: anywhere;
@@ -681,7 +699,7 @@ input.renglon-texto {
 .fecha {
   flex: none;
   color: var(--olivo);
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   font-weight: 600;
 }
 .renglon.idea {
@@ -691,13 +709,13 @@ input.renglon-texto {
   flex: none;
   margin-block: -14px;
   padding-block: 14px;
-  font-size: 13px;
+  font-size: var(--letra-mini);
 }
 
 .vacio {
   padding: 10px 0;
   color: var(--olivo);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 1.35;
 }
 
@@ -716,13 +734,13 @@ input.renglon-texto {
 .agregar input {
   display: block;
   width: 100%;
-  height: 46px;
+  height: var(--alto-control);
   padding: 0 16px;
   border: 2px solid var(--vino-16);
-  border-radius: 16px;
+  border-radius: var(--redondo);
   background: var(--papel);
   color: var(--vino);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   outline: none;
 }
 .agregar input:focus {
@@ -741,20 +759,20 @@ input.renglon-texto {
 }
 .sub h4 {
   color: var(--olivo);
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   font-weight: 600;
 }
 
 /* La lista de contenidos, dibujada desde su texto */
 .lista-titulo {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   font-weight: 700;
 }
 .lista-semana {
   margin-top: 14px;
   color: var(--olivo);
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   font-weight: 700;
 }
 .lista-texto {
@@ -764,10 +782,10 @@ input.renglon-texto {
   margin-top: 8px;
   padding: 12px 14px;
   border: 2px solid var(--vino-16);
-  border-radius: 16px;
+  border-radius: var(--redondo);
   background: var(--papel);
   color: var(--vino);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 1.45;
   resize: vertical;
   outline: none;
@@ -785,14 +803,14 @@ input.renglon-texto {
   padding-bottom: var(--abajo);
 }
 .primera-contenido {
-  padding: 28px 20px 0;
+  padding: 28px var(--margen-hoja) 0;
 }
 .primera-titulo {
   margin-bottom: 14px;
   font-family: var(--titulos);
   font-style: italic;
   font-weight: 600;
-  font-size: 29px;
+  font-size: var(--letra-titulo);
   line-height: 1.1;
 }
 .ver-ejemplo {
@@ -809,10 +827,10 @@ input.renglon-texto {
   min-height: 120px;
   padding: 12px 14px;
   border: 2px solid var(--vino-16);
-  border-radius: 16px;
+  border-radius: var(--redondo);
   background: var(--papel);
   color: var(--vino);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 1.4;
   resize: vertical;
   outline: none;
@@ -822,7 +840,7 @@ input.renglon-texto {
 }
 .pegar-error {
   margin-top: 10px;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   line-height: 1.35;
 }
 
@@ -832,14 +850,14 @@ input.renglon-texto {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 46px;
+  min-height: var(--alto-control);
   margin-top: 12px;
   padding: 0 16px;
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--redondo);
   background: var(--vino);
   color: var(--marfil);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -856,19 +874,19 @@ input.renglon-texto {
 .liga-nombre {
   display: block;
   margin-bottom: 6px;
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   font-weight: 600;
 }
 .liga input {
   display: block;
   width: 100%;
-  height: 46px;
+  height: var(--alto-control);
   padding: 0 16px;
   border: 2px solid var(--vino-16);
-  border-radius: 16px;
+  border-radius: var(--redondo);
   background: var(--papel);
   color: var(--vino);
-  font-size: 15px;
+  font-size: var(--letra-texto);
   outline: none;
 }
 .liga input:focus {
@@ -882,7 +900,7 @@ input.renglon-texto {
 /* Sábado y domingo: el texto largo */
 .finde-largo {
   margin-top: 16px;
-  font-size: 15.5px;
+  font-size: var(--letra-renglon);
   line-height: 1.45;
   white-space: pre-line;
 }
@@ -891,7 +909,7 @@ input.renglon-texto {
 .nota {
   margin-top: 4px;
   color: var(--olivo);
-  font-size: 14.5px;
+  font-size: var(--letra-chica);
   line-height: 1.35;
 }
 .nota + .pegar .pegar-texto {
@@ -899,7 +917,7 @@ input.renglon-texto {
 }
 .nota-lista {
   margin-top: 10px;
-  font-size: 15px;
+  font-size: var(--letra-texto);
   font-weight: 600;
   text-align: center;
 }
