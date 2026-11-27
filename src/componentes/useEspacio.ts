@@ -12,11 +12,16 @@ export function useEspacio(guardado: Guardado, id: string): [DatosEspacio | null
 
   useEffect(() => {
     let sigue = true
-    guardado.leer(id).then((d) => {
-      if (!sigue) return
-      actual.current = d
-      setDatos(d)
-    })
+    // Si no se pudo leer, la hoja no muestra nada: mejor eso que una hoja vacía
+    // donde lo que escriba borraría lo que ya tenía guardado
+    guardado
+      .leer(id)
+      .then((d) => {
+        if (!sigue) return
+        actual.current = d
+        setDatos(d)
+      })
+      .catch(() => {})
     return () => {
       sigue = false
     }

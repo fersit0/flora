@@ -158,6 +158,14 @@ test('copiar el respaldo y pegarlo en un teléfono nuevo regresa todo', async ({
   await expect(cafe.locator('.lista-titulo')).toHaveText('☕CAFÉ LIRIO ABRIL☕')
   await cafe.getByRole('button', { name: 'copiar' }).click()
   expect(await otro.evaluate(() => navigator.clipboard.readText())).toBe(lista)
+  await otro.keyboard.press('Escape')
+  await expect(cafe).toBeHidden()
+
+  // Ida y vuelta completa: el respaldo que sale del teléfono nuevo es idéntico al primero
+  const ajustes = await abrirAjustes(otro)
+  await ajustes.getByRole('button', { name: 'copiar respaldo' }).click()
+  await expect(ajustes.getByText('copiado ☆ pégalo en tu WhatsApp')).toBeVisible()
+  expect(await otro.evaluate(() => navigator.clipboard.readText())).toBe(respaldo)
   await nuevo.close()
 })
 

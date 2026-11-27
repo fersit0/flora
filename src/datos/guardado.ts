@@ -4,6 +4,10 @@
 //
 // Hay dos guardados separados: el de su semana ("flora") y el de la semana de ejemplo
 // ("flora-ejemplo"). Así jugar con el ejemplo nunca toca lo que ella escribió.
+//
+// iOS a veces corta la conexión con el guardado cuando la app pasó mucho tiempo en segundo
+// plano. Si pasa, se vuelve a conectar y se intenta otra vez: nunca se muestra una hoja vacía
+// ni se pierde lo que escribe.
 
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import { espacioVacio, leerDatosEspacio, type DatosEspacio } from '../logic/espacio'
@@ -46,6 +50,9 @@ function pedirQueNoSeBorre() {
  * @param inicial lo que trae un espacio que nunca se ha abierto (solo el ejemplo trae algo)
  */
 export function abrirGuardado(nombre: string, inicial: Record<string, DatosEspacio> = {}): Guardado {
+  // Desde que abre la app, no solo hasta que guarda algo
+  pedirQueNoSeBorre()
+
   let base: Promise<IDBPDatabase<Esquema>> | undefined
   const abrir = () =>
     (base ??= openDB<Esquema>(nombre, 1, {
@@ -55,45 +62,66 @@ export function abrirGuardado(nombre: string, inicial: Record<string, DatosEspac
         db.createObjectStore('espacios')
         db.createObjectStore('semana')
       },
+      // iOS cortó la conexión: la próxima vez se abre una nueva
+      terminated() {
+        base = undefined
+      },
+    }).catch((e: unknown) => {
+      base = undefined
+      throw e
     }))
+
+  /** Usa el guardado; si la conexión ya no sirve, se vuelve a conectar y lo intenta otra vez */
+  async function conBase<T>(hacer: (db: IDBPDatabase<Esquema>) => Promise<T>): Promise<T> {
+    const db = await abrir()
+    try {
+      return await hacer(db)
+    } catch {
+      if (base) {
+        const actual = await base.catch(() => null)
+        if (actual === db) {
+          base = undefined
+          db.close()
+        }
+      }
+      return hacer(await abrir())
+    }
+  }
 
   return {
     nombre,
     async leer(id) {
       const deInicio = () => structuredClone(inicial[id] ?? espacioVacio())
-      try {
-        const guardado = await (await abrir()).get('espacios', id)
-        return guardado === undefined ? deInicio() : leerDatosEspacio(guardado)
-      } catch {
-        return deInicio()
-      }
+      const guardado = await conBase((db) => db.get('espacios', id))
+      return guardado === undefined ? deInicio() : leerDatosEspacio(guardado)
     },
     async guardar(id, datos) {
-      pedirQueNoSeBorre()
-      await (await abrir()).put('espacios', datos, id)
+      await conBase((db) => db.put('espacios', datos, id))
     },
     async leerSemana() {
       try {
-        return (await (await abrir()).get('semana', SEMANA)) ?? null
+        return (await conBase((db) => db.get('semana', SEMANA))) ?? null
       } catch {
         return null
       }
     },
     async leerHojas() {
-      const db = await abrir()
-      const tx = db.transaction('espacios')
-      const hojas: Hojas = {}
-      for (let c = await tx.store.openCursor(); c; c = await c.continue()) {
-        hojas[c.key] = leerDatosEspacio(c.value)
-      }
-      return hojas
+      return conBase(async (db) => {
+        const tx = db.transaction('espacios')
+        const hojas: Hojas = {}
+        for (let c = await tx.store.openCursor(); c; c = await c.continue()) {
+          hojas[c.key] = leerDatosEspacio(c.value)
+        }
+        return hojas
+      })
     },
     async guardarDatos(textoSemana, hojas) {
-      pedirQueNoSeBorre()
-      const tx = (await abrir()).transaction(['semana', 'espacios'], 'readwrite')
-      const pendientes: Promise<unknown>[] = [tx.objectStore('semana').put(textoSemana, SEMANA)]
-      for (const [id, datos] of Object.entries(hojas ?? {})) pendientes.push(tx.objectStore('espacios').put(datos, id))
-      await Promise.all([...pendientes, tx.done])
+      await conBase(async (db) => {
+        const tx = db.transaction(['semana', 'espacios'], 'readwrite')
+        const pendientes: Promise<unknown>[] = [tx.objectStore('semana').put(textoSemana, SEMANA)]
+        for (const [id, datos] of Object.entries(hojas ?? {})) pendientes.push(tx.objectStore('espacios').put(datos, id))
+        await Promise.all([...pendientes, tx.done])
+      })
     },
   }
 }

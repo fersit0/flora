@@ -117,3 +117,15 @@ test('en el iPhone (que no avisa cuando la versión nueva toma el control) tocar
   await saleVersionB(page)
   await revisarQueSeActualiza(page)
 })
+
+test('sin internet (modo avión) abre igual, con su semana y lo que escribió', async ({ page, context }) => {
+  await abrirVersionA(page)
+  await context.setOffline(true)
+  await page.reload()
+  await expect(page.locator('.bloque').first()).toBeVisible()
+  await page.getByRole('button', { name: 'editar Velas' }).click()
+  await expect(page.getByRole('button', { name: 'llamar a la imprenta', exact: true })).toBeVisible()
+  // Las letras también vienen de la app, no de internet
+  expect(await page.evaluate(() => document.fonts.check('italic 600 29px Lora'))).toBe(true)
+  await context.setOffline(false)
+})
