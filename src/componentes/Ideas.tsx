@@ -1,4 +1,5 @@
 import { agregarIdea, editarIdea, usarIdea, type DatosEspacio, type Idea } from '../logic/espacio'
+import { tic } from './haptico'
 import { Agregar, TextoEditable } from './Renglon'
 import { nuevoId, type Cambiar } from './useEspacio'
 
@@ -41,7 +42,14 @@ function FilaIdea({ idea: i, cambiar }: { idea: Idea; cambiar: Cambiar }) {
     <li className={i.usada ? 'renglon idea usada' : 'renglon idea'}>
       <TextoEditable texto={i.texto} onCambiar={(t) => cambiar((d) => editarIdea(d, i.id, t))} />
       {!i.usada && (
-        <button type="button" className="enlace" onClick={() => cambiar((d) => usarIdea(d, i.id))}>
+        <button
+          type="button"
+          className="enlace"
+          onClick={() => {
+            tic()
+            cambiar((d) => usarIdea(d, i.id))
+          }}
+        >
           ya la usé
         </button>
       )}

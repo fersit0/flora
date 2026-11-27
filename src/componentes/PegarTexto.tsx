@@ -1,5 +1,5 @@
 // Un campo para pegar su semana o un respaldo, con su botón "listo".
-// Si el texto no sirve, lo dice en una frase y no cambia nada.
+// Si el texto no sirve, lo dice en una frase debajo de "listo" y no cambia nada.
 
 import { useState, type FormEvent } from 'react'
 
@@ -45,14 +45,13 @@ export function PegarTexto({ etiqueta, error, onListo, autoFocus }: Props) {
         spellCheck={false}
         autoFocus={autoFocus}
       />
-      {fallo && (
-        <p className="pegar-error" role="status">
-          {error}
-        </p>
-      )}
       <button type="submit" className="boton" disabled={!hayTexto || ocupado}>
         listo
       </button>
+      {/* El lugar del aviso ya está apartado: cuando sale o se va, nada se mueve */}
+      <p className="pegar-error" role="status">
+        {fallo ? error : ''}
+      </p>
     </form>
   )
 }

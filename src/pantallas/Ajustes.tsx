@@ -97,14 +97,10 @@ function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: 
       <section className="seccion" aria-label="respaldo">
         <h3 className="seccion-titulo">respaldo</h3>
         <p className="nota">tu semana y todo lo que escribiste, en un texto para guardar en tu WhatsApp.</p>
+        {/* El aviso sale en el mismo botón: nada se mueve y se ve justo donde tocó */}
         <button type="button" className="boton" onClick={copiar} disabled={respaldo === null}>
-          copiar respaldo
+          <span aria-live="polite">{copiado ? 'copiado ☆ pégalo en tu WhatsApp' : 'copiar respaldo'}</span>
         </button>
-        {copiado && (
-          <p className="nota-lista" role="status">
-            copiado ☆ pégalo en tu WhatsApp
-          </p>
-        )}
         {pegando === 'respaldo' ? (
           <>
             <p className="nota">pégalo aquí y todo regresa a como estaba en ese respaldo.</p>
@@ -161,8 +157,12 @@ function LigaCampo({ liga, onGuardar }: { liga: LigaDeSemana; onGuardar: (valor:
   return (
     <div className="liga">
       <label>
-        <span className="liga-nombre">{liga.bloques.join(' · ')}</span>
+        {/* Si no sirve, lo dice aquí mismo, en lugar del nombre: así nada se mueve */}
+        <span className="liga-nombre" aria-live="polite">
+          {fallo ? 'esa liga no la pude leer.' : liga.bloques.join(' · ')}
+        </span>
         <input
+          aria-label={liga.bloques.join(' · ')}
           type="url"
           inputMode="url"
           value={texto}
@@ -180,11 +180,6 @@ function LigaCampo({ liga, onGuardar }: { liga: LigaDeSemana; onGuardar: (valor:
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         />
       </label>
-      {fallo && (
-        <p className="pegar-error" role="status">
-          esa liga no la pude leer.
-        </p>
-      )}
     </div>
   )
 }

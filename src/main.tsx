@@ -10,6 +10,9 @@ const instalada =
   window.matchMedia('(display-mode: standalone)').matches
 if (instalada) document.documentElement.classList.add('instalada')
 
+// En el iPhone, los botones solo se ven presionados (:active) si la página escucha los toques
+document.addEventListener('touchstart', () => {}, { passive: true })
+
 // Si iOS le da a la app menos alto que la pantalla, la barrita de inicio queda fuera
 // y su espacio se le da al horario (los bloques quedan más altos y fáciles de tocar)
 function revisarAlto() {

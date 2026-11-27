@@ -1,4 +1,5 @@
 import { agregarPendiente, borrarHechos, editarPendiente, marcarPendiente, type DatosEspacio, type Pendiente } from '../logic/espacio'
+import { tic } from './haptico'
 import { Agregar, Circulo, TextoEditable } from './Renglon'
 import { nuevoId, type Cambiar } from './useEspacio'
 
@@ -32,7 +33,14 @@ export function Pendientes({ datos, cambiar, nombre, borrador }: Props) {
         <>
           <div className="sub">
             <h4>hechos</h4>
-            <button type="button" className="enlace" onClick={() => cambiar(borrarHechos)}>
+            <button
+              type="button"
+              className="enlace"
+              onClick={() => {
+                tic()
+                cambiar(borrarHechos)
+              }}
+            >
               borrar
             </button>
           </div>

@@ -37,8 +37,12 @@ export function Contenidos({ datos, cambiar }: { datos: DatosEspacio; cambiar: C
               {hayLista && (
                 <>
                   <span aria-hidden="true"> · </span>
-                  <button type="button" className="enlace" onClick={copiar}>
-                    {copiado ? 'copiado' : 'copiar'}
+                  <button type="button" className="enlace cambia" onClick={copiar}>
+                    {/* Guarda el lugar de la palabra más larga: al cambiar, "editar" no se recorre */}
+                    <span className="cambia-lugar" aria-hidden="true">
+                      copiado
+                    </span>
+                    <span>{copiado ? 'copiado' : 'copiar'}</span>
                   </button>
                 </>
               )}

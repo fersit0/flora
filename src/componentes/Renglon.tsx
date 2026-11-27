@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react'
 import { guardarBorrador, leerBorrador } from './borrador'
+import { tic } from './haptico'
 
 /** Cuando se va a otra app o bloquea el cel (iOS puede cerrar Flora sin avisar) */
 export function useAlIrse(alIrse: () => void) {
@@ -17,7 +18,16 @@ export function useAlIrse(alIrse: () => void) {
 
 export function Circulo({ hecho, texto, onTocar }: { hecho: boolean; texto: string; onTocar: () => void }) {
   return (
-    <button type="button" className="circulo" aria-pressed={hecho} aria-label={`hecho: ${texto}`} onClick={onTocar}>
+    <button
+      type="button"
+      className="circulo"
+      aria-pressed={hecho}
+      aria-label={`hecho: ${texto}`}
+      onClick={() => {
+        tic()
+        onTocar()
+      }}
+    >
       <span className="circulo-dibujo">
         {hecho && (
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -56,6 +66,8 @@ export function TextoEditable({ texto, onCambiar }: { texto: string; onCambiar: 
     if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter') e.currentTarget.blur()
     if (e.key === 'Escape') {
+      // Escape solo deja de editar; la hoja se queda abierta
+      e.preventDefault()
       cancelar.current = true
       e.currentTarget.blur()
     }

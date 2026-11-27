@@ -104,6 +104,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  overscroll-behavior: none; /* la página entera no rebota */
 }
 body {
   background: var(--marfil);
@@ -132,6 +133,15 @@ textarea {
 :focus-visible {
   outline: 2px solid var(--vino);
   outline-offset: 2px;
+}
+/* Como app: al dejar el dedo, el horario y los botones no se seleccionan
+   ni sacan el menú del iPhone (los campos de texto sí, para poder pegar) */
+.pantalla,
+button,
+a {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* ── Pantalla principal: cabe completa, sin deslizar ── */
@@ -433,7 +443,11 @@ button.finde-dia:active {
   background: none;
   cursor: pointer;
 }
+.aviso-version:active span {
+  opacity: 0.85;
+}
 .aviso-version span {
+  transition: opacity 120ms ease-out;
   padding: 6px 14px;
   border-radius: 999px;
   background: var(--vino);
@@ -520,7 +534,12 @@ html.con-hoja:not(.instalada) .pantalla {
   button.bloque,
   a.bloque,
   button.finde-dia,
-  .boton-sol {
+  .boton-sol,
+  .enlace,
+  .circulo-dibujo,
+  button.renglon-texto,
+  .boton,
+  .aviso-version span {
     animation: none;
     transition: none;
   }
@@ -625,6 +644,21 @@ html.con-hoja:not(.instalada) .pantalla {
   font-size: var(--letra-chica);
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 120ms ease-out;
+}
+.enlace:active {
+  opacity: 0.55;
+}
+/* "copiar" guarda el lugar de "copiado": las dos palabras en la misma casilla */
+.cambia {
+  display: inline-grid;
+  justify-items: start;
+}
+.cambia > span {
+  grid-area: 1 / 1;
+}
+.cambia-lugar {
+  visibility: hidden;
 }
 
 .renglones {
@@ -661,6 +695,10 @@ html.con-hoja:not(.instalada) .pantalla {
   place-items: center;
   border: 1.5px solid var(--vino-40);
   border-radius: 50%;
+  transition: transform 120ms ease-out;
+}
+.circulo:active .circulo-dibujo {
+  transform: scale(0.85);
 }
 .circulo-dibujo svg {
   width: 16px;
@@ -685,6 +723,10 @@ html.con-hoja:not(.instalada) .pantalla {
 }
 button.renglon-texto {
   cursor: text;
+  transition: opacity 120ms ease-out;
+}
+button.renglon-texto:active {
+  opacity: 0.55;
 }
 input.renglon-texto {
   outline: none;
@@ -695,6 +737,11 @@ input.renglon-texto {
 }
 .renglon.hecho .renglon-texto {
   text-decoration: line-through;
+}
+/* Lo hecho ya va a media opacidad: al presionarlo baja un poco más */
+.renglon.hecho button.renglon-texto:active,
+.renglon.usada button.renglon-texto:active {
+  opacity: 0.3;
 }
 .fecha {
   flex: none;
@@ -838,7 +885,9 @@ input.renglon-texto {
 .pegar-texto:focus {
   border-color: var(--vino-40);
 }
+/* El lugar del aviso ya está apartado (un renglón): cuando sale o se va, nada se mueve */
 .pegar-error {
+  min-height: calc(var(--letra-texto) * 1.35);
   margin-top: 10px;
   font-size: var(--letra-texto);
   line-height: 1.35;
@@ -861,6 +910,13 @@ input.renglon-texto {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition:
+    transform 120ms ease-out,
+    opacity 120ms ease-out;
+}
+.boton:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.88;
 }
 .boton:disabled {
   opacity: 0.4;
@@ -914,12 +970,6 @@ input.renglon-texto {
 }
 .nota + .pegar .pegar-texto {
   margin-top: 10px;
-}
-.nota-lista {
-  margin-top: 10px;
-  font-size: var(--letra-texto);
-  font-weight: 600;
-  text-align: center;
 }
 .enlace-suelto {
   display: block;
