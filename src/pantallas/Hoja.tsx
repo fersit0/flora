@@ -1,5 +1,6 @@
-// La hoja de un espacio: sube al tocar un bloque. Arriba, su nombre, los días en que toca
-// y la línea "por cada cosa"; adentro, sus pendientes, su lista de contenidos o sus ideas.
+// La hoja de un espacio: sube al tocar un bloque. Arriba, su nombre, los días en que toca,
+// el detalle del bloque que tocó y la línea "por cada cosa"; adentro, sus pendientes,
+// su lista de contenidos o sus ideas.
 
 import { Contenidos } from '../componentes/Contenidos'
 import { HojaQueSube } from '../componentes/HojaQueSube'
@@ -12,11 +13,13 @@ import { diasDeEspacio, resumenDeEspacio, type Espacio, type Semana } from '../l
 interface Props {
   semana: Semana
   espacio: Espacio
+  /** El detalle del bloque que se tocó (por ejemplo "diseño de campañas") */
+  detalle?: string
   guardado: Guardado
   onCerrada: () => void
 }
 
-export function Hoja({ semana, espacio, guardado, onCerrada }: Props) {
+export function Hoja({ semana, espacio, detalle, guardado, onCerrada }: Props) {
   const [datos, cambiar] = useEspacio(guardado, espacio.id)
   const dias = diasDeEspacio(semana, espacio.id)
   const resumen = resumenDeEspacio(semana, espacio)
@@ -30,7 +33,12 @@ export function Hoja({ semana, espacio, guardado, onCerrada }: Props) {
         </>
       }
       junto={dias.length > 0 && <span className={`pastilla color-${espacio.color}`}>{dias.join(' · ')}</span>}
-      debajo={resumen && <p className="hoja-resumen">{resumen}</p>}
+      debajo={
+        <>
+          {detalle && <p className="hoja-detalle">{detalle}</p>}
+          {resumen && <p className="hoja-resumen">{resumen}</p>}
+        </>
+      }
       onCerrada={onCerrada}
     >
       {() =>

@@ -9,7 +9,7 @@ import { etiquetaHora, horaDecimal, lineaAhora, posicion, queDiaEs } from '../lo
 import { NOMBRE_FINDE, type DiaFinde } from './Finde'
 
 /** Lo que se abre en una hoja al tocarlo: un espacio, sábado o domingo, o los ajustes */
-export type QueAbre = { espacio: string } | { finde: DiaFinde } | { ajustes: true }
+export type QueAbre = { espacio: string; detalle?: string } | { finde: DiaFinde } | { ajustes: true }
 
 interface Props {
   semana: Semana
@@ -142,7 +142,7 @@ function BloqueHorario({ bloque, liga, inicio, fin, onAbrir }: PropsBloque) {
   const espacio = bloque.abre && 'espacio' in bloque.abre ? bloque.abre.espacio : null
   if (espacio) {
     return (
-      <button type="button" className={clase} style={estilo} onClick={() => onAbrir({ espacio })}>
+      <button type="button" className={clase} style={estilo} onClick={() => onAbrir({ espacio, detalle: bloque.detalle })}>
         {contenido}
       </button>
     )

@@ -126,6 +126,12 @@ textarea {
   padding-bottom: var(--abajo);
 }
 
+/* Instalada, cuando iOS le da menos alto que la pantalla (812 de 874): la barrita
+   de inicio queda fuera de la app, así que ese espacio se le da al horario */
+html.corta {
+  --abajo: 8px;
+}
+
 /* Franja vichy: lo único decorado */
 .franja {
   flex: none;
@@ -445,6 +451,15 @@ html:not(.instalada) .pantalla {
   animation: subir 200ms ease-out;
   transition: transform 200ms ease-out;
 }
+/* Mientras hay una hoja abierta, la página de atrás mide lo mismo que la pantalla y no se mueve:
+   en Safari, al abrir el teclado, así nunca se asoma el horario debajo de la hoja */
+html.con-hoja,
+html.con-hoja body {
+  overflow: hidden;
+}
+html.con-hoja:not(.instalada) .pantalla {
+  min-height: 0;
+}
 .capa-hoja.cerrando .velo {
   animation: desaparecer 200ms ease-in forwards;
 }
@@ -527,6 +542,12 @@ html:not(.instalada) .pantalla {
   font-size: 13.5px;
   font-weight: 600;
   white-space: nowrap;
+}
+.hoja-detalle {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 .hoja-resumen {
   margin-top: 8px;
@@ -816,6 +837,36 @@ input.renglon-texto {
 .boton:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* Mis ligas: los bloques que la abren y su campo */
+.liga {
+  margin-top: 12px;
+}
+.liga-nombre {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.liga input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  padding: 0 16px;
+  border: 2px solid var(--vino-16);
+  border-radius: 16px;
+  background: var(--papel);
+  color: var(--vino);
+  font-size: 15px;
+  outline: none;
+}
+.liga input:focus {
+  border-color: var(--vino-40);
+}
+.liga input::placeholder {
+  color: var(--vino-50);
+  opacity: 1;
 }
 
 /* Sábado y domingo: el texto largo */

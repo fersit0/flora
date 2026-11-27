@@ -251,6 +251,18 @@ export function resumenDeEspacio(semana: Semana, espacio: Espacio): string {
 /** Direcciones que nunca se abren: no llevan a ninguna página ni app, y pueden ser peligrosas */
 const NO_SE_ABREN = ['javascript:', 'data:', 'vbscript:', 'file:', 'blob:', 'about:']
 
+/** La dirección, si el texto es una que se puede abrir (una página o una app); si no, `null`. */
+export function direccionValida(valor: string): string | null {
+  const limpio = valor.trim()
+  if (!limpio) return null
+  try {
+    const url = new URL(limpio)
+    return NO_SE_ABREN.includes(url.protocol) ? null : url.href
+  } catch {
+    return null
+  }
+}
+
 /**
  * La dirección que abre un bloque con liga (una página, o una app como "message://"),
  * o `null` si no abre nada: la liga no existe, está vacía o no es una dirección.
@@ -258,12 +270,5 @@ const NO_SE_ABREN = ['javascript:', 'data:', 'vbscript:', 'file:', 'blob:', 'abo
  */
 export function direccionDeLiga(semana: Semana, abre: Abre): string | null {
   if (abre === null || !('liga' in abre)) return null
-  const valor = (semana.ligas[abre.liga] ?? '').trim()
-  if (!valor) return null
-  try {
-    const url = new URL(valor)
-    return NO_SE_ABREN.includes(url.protocol) ? null : url.href
-  } catch {
-    return null
-  }
+  return direccionValida(semana.ligas[abre.liga] ?? '')
 }
