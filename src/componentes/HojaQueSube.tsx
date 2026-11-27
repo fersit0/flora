@@ -82,8 +82,10 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
     const t = toques.current
     const donde = e.target instanceof Element ? e.target.closest('button, a, input, textarea, label, .velo') : null
     const mismoLugar = Math.hypot(e.clientX - t.x, e.clientY - t.y) < MISMO_LUGAR
+    // Con el teclado (o VoiceOver) no hay dedo que rebote: esos toques siempre cuentan
+    const conDedo = e.detail > 0
     const segundoToque = e.timeStamp - t.cuando < DOBLE_TOQUE && mismoLugar && donde !== t.donde
-    if (t.recienAbierta || segundoToque) {
+    if (conDedo && (t.recienAbierta || segundoToque)) {
       e.preventDefault()
       e.stopPropagation()
       return

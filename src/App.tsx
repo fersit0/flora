@@ -33,18 +33,34 @@ export function App() {
   const [abierta, setAbierta] = useState<QueAbre | null>(null)
 
   // Su semana está guardada en el teléfono desde que la pegó
+  // Si no se pudo leer, no se finge que no tiene semana (le pediría pegarla otra vez):
+  // se queda esperando y vuelve a intentar al regresar a la app.
   useEffect(() => {
     if (demo) return
     let sigue = true
-    guardado.leerSemana().then((texto) => {
-      if (!sigue) return
-      const lectura = texto === null ? null : leerDatos(texto)
-      setEstado(
-        lectura?.ok ? { modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana } : { modo: 'primera' },
-      )
-    })
+    let listo = false
+    const leer = () => {
+      if (listo) return
+      guardado
+        .leerSemana()
+        .then((texto) => {
+          if (!sigue) return
+          listo = true
+          const lectura = texto === null ? null : leerDatos(texto)
+          setEstado(
+            lectura?.ok
+              ? { modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana }
+              : { modo: 'primera' },
+          )
+        })
+        .catch(() => {})
+    }
+    leer()
+    const alVolver = () => document.visibilityState === 'visible' && leer()
+    document.addEventListener('visibilitychange', alVolver)
     return () => {
       sigue = false
+      document.removeEventListener('visibilitychange', alVolver)
     }
   }, [])
 

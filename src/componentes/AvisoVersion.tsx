@@ -24,15 +24,21 @@ export function AvisoVersion() {
     },
   })
 
+  const actualizando = useRef(false)
   function actualizar() {
+    if (actualizando.current) return
+    actualizando.current = true
     // En el iPhone no siempre llega el aviso de que la versión nueva ya tomó el control
     // (en Chrome sí). Por eso también se recarga aquí en cuanto la nueva queda activa,
-    // y si nada de eso pasa, a los 3 segundos.
+    // y si eso no se alcanza a ver, a los 3 segundos (si para entonces ya no hay una esperando).
     const nueva = registro.current?.waiting
     nueva?.addEventListener('statechange', () => {
       if (nueva.state === 'activated') location.reload()
     })
-    setTimeout(() => location.reload(), ULTIMO_RECURSO)
+    setTimeout(() => {
+      if (!registro.current?.waiting) location.reload()
+      else actualizando.current = false
+    }, ULTIMO_RECURSO)
     void updateServiceWorker(true)
   }
 

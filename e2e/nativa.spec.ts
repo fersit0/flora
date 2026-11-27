@@ -98,7 +98,32 @@ test.describe('nada se mueve cuando sale un aviso', () => {
   })
 })
 
+test.describe('los avisos dicen lo que es', () => {
+  test('"copiado ☆" vuelve a "copiar respaldo" si el respaldo cambia (por ejemplo, al pegar una liga)', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await pegarSuSemana(page)
+    const hoja = await abrirAjustes(page)
+    await hoja.getByRole('button', { name: 'copiar respaldo' }).click()
+    await expect(hoja.getByText('copiado ☆ pégalo en tu WhatsApp')).toBeVisible()
+    const liga = hoja.getByRole('textbox', { name: 'correos' })
+    await liga.fill('https://example.com/correo')
+    await liga.press('Enter')
+    await expect(hoja.getByRole('button', { name: 'copiar respaldo' })).toBeVisible()
+  })
+})
+
 test.describe('se siente como app', () => {
+  test('con el teclado (o VoiceOver) los botones de una hoja recién abierta sí responden', async ({ page }) => {
+    await pegarSuSemana(page)
+    await page.getByRole('button', { name: 'ajustes' }).click()
+    // Sin esperar: con el teclado no hay dedo que rebote
+    await page.getByRole('dialog').getByRole('button', { name: 'pegar un respaldo' }).press('Enter')
+    await expect(page.getByRole('textbox', { name: 'tu respaldo' })).toBeVisible()
+  })
+
   test('cada botón cambia al presionarlo', async ({ page }) => {
     await abrir(page, MIERCOLES)
     const enHorario = [

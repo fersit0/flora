@@ -102,3 +102,31 @@ test('si iOS corta la conexión con el guardado, lo que escribe se guarda igual 
   await expect(hoja.getByRole('button', { name: 'antes del corte', exact: true })).toBeVisible()
   await expect(hoja.getByRole('button', { name: 'después del corte', exact: true })).toBeVisible()
 })
+
+test('si al abrir no se pudo leer su semana, no le pide pegarla otra vez: la lee al volver a la app', async ({
+  page,
+  context,
+}) => {
+  await page.clock.setFixedTime(new Date(MIERCOLES))
+  await page.goto('./')
+  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
+  await page.getByRole('button', { name: 'listo' }).click()
+  await page.locator('.bloque').first().waitFor()
+
+  // La vuelve a abrir y la primera vez el guardado no responde (como cuando iOS lo corta)
+  const otra = await context.newPage()
+  await otra.addInitScript(() => {
+    let fallas = 2 // en desarrollo React lo lee dos veces al empezar
+    const original = IDBFactory.prototype.open
+    IDBFactory.prototype.open = function (this: IDBFactory, ...args: Parameters<typeof original>) {
+      if (fallas-- > 0) throw new DOMException('se perdió la conexión', 'UnknownError')
+      return original.apply(this, args)
+    }
+  })
+  await otra.clock.setFixedTime(new Date(MIERCOLES))
+  await otra.goto('./')
+  await otra.waitForTimeout(500)
+  await expect(otra.getByText('pega aquí tu semana')).toHaveCount(0)
+  await otra.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await expect(otra.locator('.bloque').first()).toBeVisible()
+})

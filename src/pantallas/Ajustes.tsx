@@ -75,7 +75,11 @@ function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: 
     let sigue = true
     guardado
       .leerHojas()
-      .then((hojas) => sigue && setRespaldo(armarRespaldo(textoSemana, hojas)))
+      .then((hojas) => {
+        if (!sigue) return
+        setRespaldo(armarRespaldo(textoSemana, hojas))
+        setCopiado(false) // lo copiado ya no es lo último
+      })
       .catch(() => {})
     return () => {
       sigue = false

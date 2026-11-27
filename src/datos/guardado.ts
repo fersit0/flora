@@ -25,7 +25,7 @@ export interface Guardado {
   nombre: string
   leer(id: string): Promise<DatosEspacio>
   guardar(id: string, datos: DatosEspacio): Promise<void>
-  /** El texto de su semana, o `null` si todavía no la pega */
+  /** El texto de su semana, o `null` si todavía no la pega. Si no se pudo leer, falla. */
   leerSemana(): Promise<string | null>
   /** Todo lo que escribió, hoja por hoja (para el respaldo) */
   leerHojas(): Promise<Hojas>
@@ -99,11 +99,7 @@ export function abrirGuardado(nombre: string, inicial: Record<string, DatosEspac
       await conBase((db) => db.put('espacios', datos, id))
     },
     async leerSemana() {
-      try {
-        return (await conBase((db) => db.get('semana', SEMANA))) ?? null
-      } catch {
-        return null
-      }
+      return (await conBase((db) => db.get('semana', SEMANA))) ?? null
     },
     async leerHojas() {
       return conBase(async (db) => {
