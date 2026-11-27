@@ -16,7 +16,7 @@ test('sábado y domingo: al tocarlos sube su texto largo', async ({ page }) => {
     const hoja = page.getByRole('dialog')
     await expect(hoja.getByRole('heading', { level: 2 })).toHaveText(nombre)
     await expect(hoja.locator('.finde-largo')).toHaveText(texto.largo)
-    await page.waitForTimeout(250) // lo que dura la animación
+    await page.waitForTimeout(350) // lo que dura la animación, y los primeros toques que se ignoran (doble toque)
     await revisarQueNoHayRojo(page)
     // Se cierra como las otras hojas: tocando fuera
     await page.mouse.click(200, 40)

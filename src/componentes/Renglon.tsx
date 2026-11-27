@@ -1,7 +1,19 @@
 // Las piezas de cada renglón de una hoja: el círculo, el texto que se edita al tocarlo
 // y el campo para agregar.
 
-import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react'
+import { guardarBorrador, leerBorrador } from './borrador'
+
+/** Cuando se va a otra app o bloquea el cel (iOS puede cerrar Flora sin avisar) */
+export function useAlIrse(alIrse: () => void) {
+  const ultimo = useRef(alIrse)
+  ultimo.current = alIrse
+  useEffect(() => {
+    const revisar = () => document.visibilityState === 'hidden' && ultimo.current()
+    document.addEventListener('visibilitychange', revisar)
+    return () => document.removeEventListener('visibilitychange', revisar)
+  }, [])
+}
 
 export function Circulo({ hecho, texto, onTocar }: { hecho: boolean; texto: string; onTocar: () => void }) {
   return (
@@ -17,10 +29,20 @@ export function Circulo({ hecho, texto, onTocar }: { hecho: boolean; texto: stri
   )
 }
 
-/** Tocar el texto lo vuelve editable. Enter o tocar fuera lo guarda; dejarlo vacío lo quita. */
+/**
+ * Tocar el texto lo vuelve editable. Enter o tocar fuera lo guarda; dejarlo vacío lo quita.
+ * Si se va a otra app a media edición, lo escrito se guarda y al volver sigue editando.
+ */
 export function TextoEditable({ texto, onCambiar }: { texto: string; onCambiar: (nuevo: string) => void }) {
   const [editando, setEditando] = useState(false)
   const cancelar = useRef(false)
+  const campo = useRef<HTMLInputElement>(null)
+
+  useAlIrse(() => {
+    const valor = campo.current?.value
+    // Vacío no: al irse no se borra nada
+    if (editando && valor?.trim() && valor !== texto) onCambiar(valor)
+  })
 
   if (!editando) {
     return (
@@ -41,6 +63,7 @@ export function TextoEditable({ texto, onCambiar }: { texto: string; onCambiar: 
 
   return (
     <input
+      ref={campo}
       className="renglon-texto"
       defaultValue={texto}
       aria-label={`editar: ${texto}`}
@@ -59,9 +82,22 @@ export function TextoEditable({ texto, onCambiar }: { texto: string; onCambiar: 
 /**
  * El campo siempre visible: escribes y Enter, como en WhatsApp.
  * Si pega varios renglones, cada uno entra como uno nuevo.
+ * `recordar`: dónde se guarda lo que lleva escrito, para que siga ahí si iOS cierra la app.
  */
-export function Agregar({ texto, onAgregar }: { texto: string; onAgregar: (textos: string[]) => void }) {
-  const [valor, setValor] = useState('')
+export function Agregar({
+  texto,
+  recordar,
+  onAgregar,
+}: {
+  texto: string
+  recordar?: string
+  onAgregar: (textos: string[]) => void
+}) {
+  const [valor, setValorSolo] = useState(() => leerBorrador(recordar))
+  const setValor = (nuevo: string) => {
+    setValorSolo(nuevo)
+    guardarBorrador(recordar, nuevo)
+  }
 
   function pegar(e: ClipboardEvent<HTMLInputElement>) {
     const pegado = e.clipboardData.getData('text')

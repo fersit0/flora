@@ -96,7 +96,7 @@ export async function abrirHoja(page: Page, bloque: string) {
   await page.getByRole('button', { name: bloque }).first().click()
   const hoja = page.getByRole('dialog')
   await expect(hoja).toBeVisible()
-  await page.waitForTimeout(250) // lo que dura la animación
+  await page.waitForTimeout(350) // lo que dura la animación, y los primeros toques que se ignoran (doble toque)
   return hoja
 }
 

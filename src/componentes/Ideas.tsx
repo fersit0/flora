@@ -2,7 +2,7 @@ import { agregarIdea, editarIdea, usarIdea, type DatosEspacio, type Idea } from 
 import { Agregar, TextoEditable } from './Renglon'
 import { nuevoId, type Cambiar } from './useEspacio'
 
-export function Ideas({ datos, cambiar }: { datos: DatosEspacio; cambiar: Cambiar }) {
+export function Ideas({ datos, cambiar, borrador }: { datos: DatosEspacio; cambiar: Cambiar; borrador: string }) {
   const nuevas = datos.ideas.filter((i) => !i.usada)
   const usadas = datos.ideas.filter((i) => i.usada)
 
@@ -10,6 +10,7 @@ export function Ideas({ datos, cambiar }: { datos: DatosEspacio; cambiar: Cambia
     <section className="seccion seccion-ideas" aria-label="ideas">
       <Agregar
         texto="+ anota una idea…"
+        recordar={borrador}
         // Si pega varias, la primera queda hasta arriba
         onAgregar={(textos) => cambiar((d) => [...textos].reverse().reduce((x, t) => agregarIdea(x, t, nuevoId()), d))}
       />

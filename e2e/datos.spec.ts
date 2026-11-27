@@ -26,7 +26,7 @@ async function abrirAjustes(page: Page) {
   await page.getByRole('button', { name: 'ajustes' }).click()
   const hoja = page.getByRole('dialog')
   await expect(hoja.getByRole('heading', { level: 2 })).toHaveText('ajustes')
-  await page.waitForTimeout(250) // lo que dura la animación
+  await page.waitForTimeout(350) // lo que dura la animación, y los primeros toques que se ignoran (doble toque)
   return hoja
 }
 

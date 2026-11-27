@@ -23,6 +23,8 @@ export function Hoja({ semana, espacio, detalle, guardado, onCerrada }: Props) {
   const [datos, cambiar] = useEspacio(guardado, espacio.id)
   const dias = diasDeEspacio(semana, espacio.id)
   const resumen = resumenDeEspacio(semana, espacio)
+  // Lo que lleva escrito en el campo, aparte en su semana y en la de ejemplo
+  const borrador = `${guardado.nombre}:${espacio.id}`
 
   return (
     <HojaQueSube
@@ -44,10 +46,10 @@ export function Hoja({ semana, espacio, detalle, guardado, onCerrada }: Props) {
       {() =>
         datos &&
         (espacio.tipo === 'ideas' ? (
-          <Ideas datos={datos} cambiar={cambiar} />
+          <Ideas datos={datos} cambiar={cambiar} borrador={borrador} />
         ) : (
           <>
-            <Pendientes datos={datos} cambiar={cambiar} nombre={espacio.nombre} />
+            <Pendientes datos={datos} cambiar={cambiar} nombre={espacio.nombre} borrador={borrador} />
             {espacio.tipo === 'cliente' && <Contenidos datos={datos} cambiar={cambiar} />}
           </>
         ))

@@ -17,6 +17,8 @@ interface Esquema extends DBSchema {
 const SEMANA = 'actual'
 
 export interface Guardado {
+  /** "flora" o "flora-ejemplo" */
+  nombre: string
   leer(id: string): Promise<DatosEspacio>
   guardar(id: string, datos: DatosEspacio): Promise<void>
   /** El texto de su semana, o `null` si todavía no la pega */
@@ -56,6 +58,7 @@ export function abrirGuardado(nombre: string, inicial: Record<string, DatosEspac
     }))
 
   return {
+    nombre,
     async leer(id) {
       const deInicio = () => structuredClone(inicial[id] ?? espacioVacio())
       try {

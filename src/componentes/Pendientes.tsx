@@ -2,7 +2,15 @@ import { agregarPendiente, borrarHechos, editarPendiente, marcarPendiente, type 
 import { Agregar, Circulo, TextoEditable } from './Renglon'
 import { nuevoId, type Cambiar } from './useEspacio'
 
-export function Pendientes({ datos, cambiar, nombre }: { datos: DatosEspacio; cambiar: Cambiar; nombre: string }) {
+interface Props {
+  datos: DatosEspacio
+  cambiar: Cambiar
+  nombre: string
+  /** Dónde se guarda lo que lleva escrito en el campo */
+  borrador: string
+}
+
+export function Pendientes({ datos, cambiar, nombre, borrador }: Props) {
   const faltan = datos.pendientes.filter((p) => !p.hecho)
   const hechos = datos.pendientes.filter((p) => p.hecho)
 
@@ -17,6 +25,7 @@ export function Pendientes({ datos, cambiar, nombre }: { datos: DatosEspacio; ca
       </ul>
       <Agregar
         texto="+ escribe un pendiente…"
+        recordar={borrador}
         onAgregar={(textos) => cambiar((d) => textos.reduce((x, t) => agregarPendiente(x, t, nuevoId()), d))}
       />
       {hechos.length > 0 && (

@@ -2,9 +2,13 @@
 // que no saliste. Se cierra tocando fuera, jalando el asa hacia abajo o con el gesto de atrás.
 // La usan las hojas de cada espacio y los ajustes; lo de adentro lo pone cada una.
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react'
 
 const DURACION = 200 // ms, lo mismo que la animación en estilos.css
+/** ms: dos toques más juntos que esto son un doble toque (o el dedo que rebotó) */
+const DOBLE_TOQUE = 300
+/** px: qué tan cerca cae el segundo toque de un doble toque */
+const MISMO_LUGAR = 30
 
 function sinMovimiento() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -28,6 +32,7 @@ interface Props {
 
 export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Props) {
   const [cerrando, setCerrando] = useState(false)
+  const yaSeCierra = useRef(false)
   const hoja = useRef<HTMLElement>(null)
 
   // El gesto de atrás cierra la hoja: al abrirla se agrega un paso al historial
@@ -35,6 +40,7 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
     if (history.state?.hoja !== true) history.pushState({ hoja: true }, '')
     const alRegresar = () => {
       soltarElCampo()
+      yaSeCierra.current = true
       setCerrando(true)
     }
     window.addEventListener('popstate', alRegresar)
@@ -42,7 +48,10 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
     return () => window.removeEventListener('popstate', alRegresar)
   }, [])
 
+  // Solo una vez: dos "atrás" seguidos la sacarían de la app
   const cerrar = useCallback(() => {
+    if (yaSeCierra.current) return
+    yaSeCierra.current = true
     soltarElCampo()
     if (history.state?.hoja === true) history.back()
     else setCerrando(true)
@@ -59,6 +68,28 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
     const t = setTimeout(onCerrada, sinMovimiento() ? 0 : DURACION)
     return () => clearTimeout(t)
   }, [cerrando, onCerrada])
+
+  // Un doble toque hace una sola cosa. El segundo toque se ignora si llega muy pronto:
+  // - justo al abrir (el dedo que abrió la hoja cerraría la hoja o tocaría lo que subió);
+  // - en el mismo lugar, pero ya sobre otra cosa (al marcar un pendiente, el de abajo
+  //   se recorre a su lugar y se marcaría también).
+  const toques = useRef({ recienAbierta: true, cuando: -Infinity, x: 0, y: 0, donde: null as Element | null })
+  useEffect(() => {
+    const t = setTimeout(() => (toques.current.recienAbierta = false), DOBLE_TOQUE)
+    return () => clearTimeout(t)
+  }, [])
+  function alTocar(e: MouseEvent<HTMLDivElement>) {
+    const t = toques.current
+    const donde = e.target instanceof Element ? e.target.closest('button, a, input, textarea, label, .velo') : null
+    const mismoLugar = Math.hypot(e.clientX - t.x, e.clientY - t.y) < MISMO_LUGAR
+    const segundoToque = e.timeStamp - t.cuando < DOBLE_TOQUE && mismoLugar && donde !== t.donde
+    if (t.recienAbierta || segundoToque) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+    Object.assign(t, { cuando: e.timeStamp, x: e.clientX, y: e.clientY, donde })
+  }
 
   // Jalar el asa hacia abajo
   const arrastre = useRef<{ y: number; t: number; baja: number } | null>(null)
@@ -85,7 +116,7 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
   }
 
   return (
-    <div className={cerrando ? 'capa-hoja cerrando' : 'capa-hoja'}>
+    <div className={cerrando ? 'capa-hoja cerrando' : 'capa-hoja'} onClickCapture={alTocar}>
       <div className="velo" onClick={cerrar} aria-hidden="true" />
       <section
         ref={hoja}

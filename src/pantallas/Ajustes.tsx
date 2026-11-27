@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { copiarTexto } from '../componentes/copiar'
 import { HojaQueSube } from '../componentes/HojaQueSube'
 import { PegarTexto } from '../componentes/PegarTexto'
+import { useAlIrse } from '../componentes/Renglon'
 import type { Guardado } from '../datos/guardado'
 import { ligasDeLaSemana, type LigaDeSemana } from '../logic/ligas'
 import { armarRespaldo } from '../logic/respaldo'
@@ -143,7 +144,10 @@ function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: 
   )
 }
 
-/** Una liga: los bloques que la abren y el campo para pegarla. Se guarda al salir del campo. */
+/**
+ * Una liga: los bloques que la abren y el campo para pegarla. Se guarda al salir del campo
+ * o al irse a otra app (iOS puede cerrar Flora sin avisar).
+ */
 function LigaCampo({ liga, onGuardar }: { liga: LigaDeSemana; onGuardar: (valor: string) => Promise<boolean> }) {
   const [texto, setTexto] = useState(liga.valor)
   const [fallo, setFallo] = useState(false)
@@ -152,6 +156,7 @@ function LigaCampo({ liga, onGuardar }: { liga: LigaDeSemana; onGuardar: (valor:
     if (texto.trim() === liga.valor.trim()) return
     setFallo(!(await onGuardar(texto)))
   }
+  useAlIrse(guardar)
 
   return (
     <div className="liga">
