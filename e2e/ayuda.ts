@@ -100,15 +100,15 @@ export async function abrirHoja(page: Page, bloque: string) {
   return hoja
 }
 
-/** Espera a que lo que se ve ya esté guardado en el teléfono (IndexedDB del ejemplo). */
-export async function esperarGuardado(page: Page, espacio: string, contiene: string) {
+/** Espera a que lo que se ve ya esté guardado en el teléfono (IndexedDB del ejemplo, o "flora" para la suya). */
+export async function esperarGuardado(page: Page, espacio: string, contiene: string, guardado = 'flora-ejemplo') {
   await expect
     .poll(
       () =>
         page.evaluate(
-          (id) =>
+          ([id, nombre]) =>
             new Promise<string>((listo) => {
-              const abrir = indexedDB.open('flora-ejemplo')
+              const abrir = indexedDB.open(nombre)
               abrir.onsuccess = () => {
                 const leer = abrir.result.transaction('espacios').objectStore('espacios').get(id)
                 leer.onsuccess = () => {
@@ -117,7 +117,7 @@ export async function esperarGuardado(page: Page, espacio: string, contiene: str
                 }
               }
             }),
-          espacio,
+          [espacio, guardado],
         ),
       { message: 'no se terminó de guardar' },
     )

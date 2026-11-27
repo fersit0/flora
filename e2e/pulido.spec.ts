@@ -120,3 +120,44 @@ test('con el alto corto de iOS, el horario usa el espacio de la barrita de inici
   expect(despues.hora, 'los bloques crecen').toBeGreaterThan(antes.hora)
   await revisarQueCabe(page)
 })
+
+test.describe('instalada en su iPhone 17 Pro (402 × 874, con la hora y la barrita)', () => {
+  test.use({ viewport: { width: 402, height: 874 } })
+  test.beforeEach(async ({ page }) => {
+    test.skip(test.info().project.name !== '393x852', 'la medida es la de su teléfono')
+    // Como abierta desde el ícono, con las orillas de su pantalla: 62 arriba y 34 abajo
+    await page.addInitScript(() => Object.defineProperty(navigator, 'standalone', { value: true }))
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setSafeAreaInsetsOverride', { insets: { top: 62, bottom: 34 } })
+  })
+
+  test('después de cerrar el teclado, si iOS la deja en 812 sin avisar, el horario igual usa ese alto', async ({ page }) => {
+    await abrir(page, MIERCOLES)
+    await expect(page.locator('html')).toHaveClass(/instalada/)
+    await expect(page.locator('html')).not.toHaveClass(/corta/)
+    // Así queda después del teclado: 812 de alto, sin un "resize"
+    await page.evaluate(() => Object.defineProperty(window, 'innerHeight', { get: () => 812, configurable: true }))
+    const hoja = await abrirHoja(page, 'editar Velas')
+    await hoja.getByRole('textbox', { name: '+ escribe un pendiente…' }).focus()
+    await hoja.getByRole('textbox', { name: '+ escribe un pendiente…' }).blur()
+    await expect(page.locator('html')).toHaveClass(/corta/, { timeout: 3000 })
+  })
+
+  test('al volver a la app también revisa el alto', async ({ page }) => {
+    await abrir(page, MIERCOLES)
+    await page.evaluate(() => {
+      Object.defineProperty(window, 'innerHeight', { get: () => 812, configurable: true })
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await expect(page.locator('html')).toHaveClass(/corta/, { timeout: 3000 })
+  })
+
+  test('a todo lo alto, sábado y domingo quedan arriba de la barrita y nada se corta', async ({ page }) => {
+    await abrir(page, MIERCOLES)
+    const finde = await page.locator('.finde').boundingBox()
+    expect(finde!.y + finde!.height, 'sábado y domingo bajo la barrita de inicio').toBeLessThanOrEqual(874 - 34)
+    const franja = await page.locator('.franja').boundingBox()
+    expect(franja!.height, 'la franja cubre la hora y la isla').toBeGreaterThanOrEqual(62)
+    await revisarQueCabe(page)
+  })
+})

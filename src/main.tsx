@@ -26,7 +26,18 @@ function revisarAlto() {
 }
 if (instalada) {
   revisarAlto()
-  window.addEventListener('resize', revisarAlto)
+  // iOS no siempre avisa cuando cambia el alto: después de cerrar el teclado la deja en 812
+  // sin un "resize". Por eso también se revisa al soltar un campo y al volver a la app,
+  // otra vez un momento después (lo que tarda el teclado en irse).
+  const revisarYOtraVez = () => {
+    revisarAlto()
+    setTimeout(revisarAlto, 400)
+    setTimeout(revisarAlto, 1200)
+  }
+  window.addEventListener('resize', revisarYOtraVez)
+  window.visualViewport?.addEventListener('resize', revisarYOtraVez)
+  document.addEventListener('focusout', revisarYOtraVez)
+  document.addEventListener('visibilitychange', revisarYOtraVez)
 }
 
 createRoot(document.getElementById('root')!).render(
