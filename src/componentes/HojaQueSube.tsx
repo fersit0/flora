@@ -44,7 +44,8 @@ export function HojaQueSube({ titulo, junto, debajo, onCerrada, children }: Prop
       setCerrando(true)
     }
     window.addEventListener('popstate', alRegresar)
-    hoja.current?.focus({ preventScroll: true })
+    // Si algo de adentro ya tomó el cursor (un campo para escribir), se queda ahí
+    if (!hoja.current?.contains(document.activeElement)) hoja.current?.focus({ preventScroll: true })
     return () => window.removeEventListener('popstate', alRegresar)
   }, [])
 

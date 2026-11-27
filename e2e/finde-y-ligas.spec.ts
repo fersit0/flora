@@ -2,7 +2,7 @@
 
 import { expect, test } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, revisarQueCabe, revisarQueNoHayRojo } from './ayuda'
+import { abrir, abrirConLiga, revisarQueCabe, revisarQueNoHayRojo } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 
@@ -50,11 +50,9 @@ test('tocar una liga de página la abre', async ({ page }) => {
 
 test('una liga sin dirección, o con una que no sirve, no se puede tocar', async ({ page }) => {
   await page.clock.setFixedTime(new Date(MIERCOLES))
-  await page.goto('./')
   // Su semana tal cual, pero sin la liga del planeador y con una del correo que no es dirección
   const semana = { ...ejemplo, ligas: { planeador: '', correo: 'javascript:alert(1)' } }
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(semana))
-  await page.getByRole('button', { name: 'listo' }).click()
+  await abrirConLiga(page, JSON.stringify(semana))
   await expect(page.locator('.bloque').first()).toBeVisible()
   await expect(page.locator('a.bloque')).toHaveCount(0)
   for (const nombre of ['crear lo mío', 'correos', 'subir videos']) {

@@ -1,4 +1,24 @@
 import { expect, type Page } from '@playwright/test'
+import { armarLiga } from '../scripts/liga.mjs'
+import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
+
+/** Su liga de instalación con esa semana (por omisión, la de ejemplo como si fuera la suya) */
+export function liga(texto: string = JSON.stringify(ejemplo), base = './') {
+  return armarLiga(texto, base)
+}
+
+/**
+ * Abre Flora con su liga de instalación, como la primera vez en su teléfono: la semana entra
+ * sola. Si ya tenía una guardada, la liga no la pisa.
+ */
+export async function abrirConLiga(page: Page, texto?: string, fecha = '2026-11-25T12:30:00-06:00') {
+  await page.clock.setFixedTime(new Date(fecha))
+  // Desde otra página, para que sí se cargue de nuevo
+  await page.goto('about:blank')
+  await page.goto(liga(texto))
+  await page.locator('.bloque').first().waitFor()
+  await page.evaluate(() => document.fonts.ready)
+}
 
 /** Abre la app con la semana de ejemplo, a la fecha y hora indicadas (hora de CDMX). */
 export async function abrir(page: Page, fecha: string) {

@@ -1,10 +1,34 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // El repo se llama "flora", así que la página vive en /flora/
 const base = '/flora/'
+
+// Su liga de instalación (?semana=…): al agregar a inicio, el iPhone instala la app en la
+// dirección del manifiesto (/flora/) y su semana se quedaría fuera (lo vimos en el simulador).
+// Sin manifiesto, el iPhone la instala en la dirección de la página, con su semana adentro.
+// Por eso el manifiesto solo se pone cuando la página no se abrió con su liga.
+const manifiestoSinSuLiga: Plugin = {
+  name: 'flora-manifiesto-sin-su-liga',
+  apply: 'build',
+  enforce: 'post',
+  // Al final de todo: el plugin de la PWA pone su <link rel="manifest"> casi al terminar
+  writeBundle(opciones) {
+    const archivo = join(opciones.dir ?? 'dist', 'index.html')
+    const html = readFileSync(archivo, 'utf8')
+    const conScript = html.replace(
+      /<link rel="manifest" href="([^"]+)"[^>]*>/,
+      (_, href: string) =>
+        `<script>if(!/[?&]semana=/.test(location.search)){var m=document.createElement('link');m.rel='manifest';m.href=${JSON.stringify(href)};document.head.appendChild(m)}</script>`,
+    )
+    if (conScript === html) throw new Error('no encontré el manifiesto en index.html')
+    writeFileSync(archivo, conScript)
+  },
+}
 
 export default defineConfig({
   base,
@@ -35,6 +59,7 @@ export default defineConfig({
         navigateFallback: `${base}index.html`,
       },
     }),
+    manifiestoSinSuLiga,
   ],
   test: {
     include: ['src/**/*.test.ts', 'pruebas/**/*.test.ts'],

@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { extname, join } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { esperarGuardado } from './ayuda'
+import { esperarGuardado, liga } from './ayuda'
 
 const PUERTO = 5191
 const TIPOS: Record<string, string> = {
@@ -56,9 +56,7 @@ test.afterAll(async () => {
 /** Ella tiene la versión "a" abierta, con su semana y un pendiente escrito */
 async function abrirVersionA(page: Page) {
   raiz = join(carpeta, 'a')
-  await page.goto(`http://localhost:${PUERTO}/flora/`)
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-  await page.getByRole('button', { name: 'listo' }).click()
+  await page.goto(liga(JSON.stringify(ejemplo), `http://localhost:${PUERTO}/flora/`))
   await page.getByRole('button', { name: 'editar Velas' }).click()
   await page.waitForTimeout(350)
   const campo = page.getByRole('textbox', { name: '+ escribe un pendiente…' })
@@ -128,4 +126,16 @@ test('sin internet (modo avión) abre igual, con su semana y lo que escribió', 
   // Las letras también vienen de la app, no de internet
   expect(await page.evaluate(() => document.fonts.check('italic 600 29px Lora'))).toBe(true)
   await context.setOffline(false)
+})
+
+test('con su liga de instalación la página no lleva manifiesto (así el iPhone instala su liga completa)', async ({
+  page,
+}) => {
+  raiz = join(carpeta, 'a')
+  await page.goto(liga(JSON.stringify(ejemplo), `http://localhost:${PUERTO}/flora/`))
+  await page.locator('.bloque').first().waitFor()
+  await expect(page.locator('link[rel="manifest"]')).toHaveCount(0)
+  // Sin su liga, sí: así la página normal se instala como siempre
+  await page.goto(`http://localhost:${PUERTO}/flora/`)
+  await expect(page.locator('link[rel="manifest"]')).toHaveCount(1)
 })

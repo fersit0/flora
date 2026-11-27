@@ -539,7 +539,10 @@ html.con-hoja:not(.instalada) .pantalla {
   .circulo-dibujo,
   button.renglon-texto,
   .boton,
-  .aviso-version span {
+  .aviso-version span,
+  .boton-listo,
+  .hueco,
+  .opcion {
     animation: none;
     transition: none;
   }
@@ -842,32 +845,6 @@ input.renglon-texto {
 }
 
 /* ── Pegar su semana o un respaldo ── */
-.primera {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: var(--abajo);
-}
-.primera-contenido {
-  padding: 28px var(--margen-hoja) 0;
-}
-.primera-titulo {
-  margin-bottom: 14px;
-  font-family: var(--titulos);
-  font-style: italic;
-  font-weight: 600;
-  font-size: var(--letra-titulo);
-  line-height: 1.1;
-}
-.ver-ejemplo {
-  display: block;
-  width: fit-content;
-  margin: 9px auto 0;
-  padding: 13px 8px;
-  text-decoration: none;
-}
-
 .pegar-texto {
   display: block;
   width: 100%;
@@ -927,13 +904,16 @@ input.renglon-texto {
 .liga {
   margin-top: 12px;
 }
-.liga-nombre {
+
+/* Campos de las hojas (mis ligas y editar su semana), con su etiqueta encima */
+.etiqueta {
   display: block;
   margin-bottom: 6px;
+  padding: 0;
   font-size: var(--letra-chica);
   font-weight: 600;
 }
-.liga input {
+.campo {
   display: block;
   width: 100%;
   height: var(--alto-control);
@@ -944,13 +924,136 @@ input.renglon-texto {
   color: var(--vino);
   font-size: var(--letra-texto);
   outline: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
-.liga input:focus {
+.campo:focus {
   border-color: var(--vino-40);
 }
-.liga input::placeholder {
+.campo::placeholder {
   color: var(--olivo);
   opacity: 1;
+}
+.campo-largo {
+  height: auto;
+  min-height: 110px;
+  padding: 12px 14px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+/* ── Editar su semana ── */
+/* En modo edición todo se nota: el título dice "editando" y cada bloque lleva una orilla punteada */
+.boton-listo {
+  flex: none;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vino);
+  color: var(--marfil);
+  font-size: var(--letra-texto);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+.boton-listo:active {
+  transform: scale(0.96);
+}
+.pantalla.editando .bloque,
+.pantalla.editando .finde-dia {
+  outline: 1.5px dashed currentColor;
+  outline-offset: -4px;
+}
+/* Un hueco libre: se toca para agregar ahí un bloque */
+.hueco {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--arriba) + var(--entre-bloques) / 2);
+  height: calc(var(--alto) - var(--entre-bloques));
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed var(--vino-22);
+  border-radius: 9px;
+  background: none;
+  color: var(--olivo);
+  font: inherit;
+  font-size: var(--letra-seccion);
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+.hueco:active {
+  transform: scale(0.96);
+}
+.editor {
+  margin-top: 16px;
+}
+.editor-renglon {
+  display: flex;
+  gap: 12px;
+}
+.editor-campo {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  margin-top: 14px;
+}
+.editor-emoji {
+  flex: 0 0 76px;
+}
+.editor-emoji .campo {
+  padding: 0;
+  text-align: center;
+}
+.editor-grupo {
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+/* Opciones para escoger: de qué es y el día */
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  border: 2px solid var(--vino-16);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--vino);
+  font-size: var(--letra-chica);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 120ms ease-out;
+}
+.opcion:active {
+  opacity: 0.6;
+}
+.opcion[aria-pressed='true'] {
+  border-color: var(--vino);
+  background: var(--marfil);
+}
+/* El color de cada responsabilidad, en chiquito (papel y rayado llevan su orilla) */
+.punto {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+  border-style: solid;
+  border-radius: 50%;
+}
+.punto:not(.color-papel, .color-rayado) {
+  border-color: transparent;
 }
 
 /* Sábado y domingo: el texto largo */

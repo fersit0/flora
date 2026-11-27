@@ -4,7 +4,7 @@
 
 import { expect, test } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, abrirHoja, esperarGuardado } from './ayuda'
+import { abrir, abrirConLiga, abrirHoja, esperarGuardado } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 
@@ -18,7 +18,7 @@ test('al abrir, le pide al teléfono que no borre lo guardado aunque le falte es
     }
   })
   await page.goto('./')
-  await page.getByRole('textbox', { name: 'tu semana' }).waitFor()
+  await page.locator('.bloque').first().waitFor()
   // Todavía no guarda nada y ya lo pidió
   await expect.poll(() => page.evaluate(() => (window as Window & { pedidos?: number }).pedidos)).toBe(1)
 })
@@ -74,11 +74,8 @@ test('si iOS corta la conexión con el guardado, lo que escribe se guarda igual 
       }
     }
   })
-  // Su semana (la de ejemplo pegada como si fuera la suya): sus hojas empiezan vacías
-  await page.clock.setFixedTime(new Date(MIERCOLES))
-  await page.goto('./')
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-  await page.getByRole('button', { name: 'listo' }).click()
+  // Su semana (la de ejemplo, con su liga, como si fuera la suya): sus hojas empiezan vacías
+  await abrirConLiga(page)
   let hoja = await abrirHoja(page, 'editar Velas')
   let campo = hoja.getByRole('textbox', { name: '+ escribe un pendiente…' })
   await campo.fill('antes del corte')
@@ -107,11 +104,8 @@ test('si al abrir no se pudo leer su semana, no le pide pegarla otra vez: la lee
   page,
   context,
 }) => {
-  await page.clock.setFixedTime(new Date(MIERCOLES))
-  await page.goto('./')
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-  await page.getByRole('button', { name: 'listo' }).click()
-  await page.locator('.bloque').first().waitFor()
+  // Su semana (con otro nombre en un bloque, para distinguirla de la de ejemplo)
+  await abrirConLiga(page, JSON.stringify(ejemplo).replace('"caminar"', '"yoga"'))
 
   // La vuelve a abrir y la primera vez el guardado no responde (como cuando iOS lo corta)
   const otra = await context.newPage()
@@ -126,7 +120,8 @@ test('si al abrir no se pudo leer su semana, no le pide pegarla otra vez: la lee
   await otra.clock.setFixedTime(new Date(MIERCOLES))
   await otra.goto('./')
   await otra.waitForTimeout(500)
-  await expect(otra.getByText('pega aquí tu semana')).toHaveCount(0)
+  // Ni le pide pegarla ni le enseña la de ejemplo como si no tuviera
+  await expect(otra.locator('.bloque')).toHaveCount(0)
   await otra.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
-  await expect(otra.locator('.bloque').first()).toBeVisible()
+  await expect(otra.locator('.bloque', { hasText: 'yoga' }).first()).toBeVisible()
 })

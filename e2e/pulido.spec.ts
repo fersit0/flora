@@ -2,18 +2,14 @@
 
 import { expect, test, type Page } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, abrirHoja, revisarQueCabe } from './ayuda'
+import { abrir, abrirConLiga, abrirHoja, revisarQueCabe } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 // Su semana (inventada), todavía sin la liga del planeador
 const SIN_PLANEADOR = JSON.stringify({ ...ejemplo, ligas: { planeador: '', correo: 'message://' } })
 
 async function pegarSuSemana(page: Page, texto = SIN_PLANEADOR) {
-  await page.clock.setFixedTime(new Date(MIERCOLES))
-  await page.goto('./')
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(texto)
-  await page.getByRole('button', { name: 'listo' }).click()
-  await expect(page.locator('.bloque').first()).toBeVisible()
+  await abrirConLiga(page, texto, MIERCOLES)
 }
 
 async function abrirAjustes(page: Page) {

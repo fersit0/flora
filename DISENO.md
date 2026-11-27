@@ -116,6 +116,15 @@ Nombres cortos: máximo dos renglones de unos 10 caracteres. Si un nombre no cab
 - Adentro de la hoja sí se desliza si la lista es larga. La regla de no deslizar es de la pantalla principal.
 - Animación: solo la hoja al subir y bajar (200 ms). Si el teléfono pide menos movimiento, aparece sin animación.
 
+## Editar su semana
+
+- Se entra desde ajustes, "editar mi semana". El horario es el mismo, pero se nota que está en edición: el título dice "editando", el solecito se cambia por un botón vino "listo", y cada bloque, sábado y domingo llevan una orilla punteada del color de su letra.
+- Cada hueco libre lleva una orilla punteada vino al 22% y un "+" olivo: tocarlo agrega ahí un bloque.
+- La hoja para editar un bloque usa los mismos campos que "mis ligas" (papel, orilla vino al 16%, esquinas de 16 px): emoji y nombre en un renglón, "de qué es" y "día" como opciones redondas (la escogida lleva orilla vino), "empieza" y "acaba" con el selector del iPhone, y "qué toca ahí".
+- Cada "de qué es" lleva un punto de 14 px con su color, para reconocerlo de un vistazo.
+- Si algo no queda (no cabe el nombre, se encima con otro bloque), una frase debajo, en vino y sin rojo: "ese nombre no cabe en el bloque: prueba uno más corto.", "se encima con «comida».". Su lugar ya está apartado, así que nada se mueve.
+- Borrar pide un segundo toque: "borrar este bloque" → "toca otra vez para borrarlo".
+
 ## Voz de los textos
 
 - Primera persona y minúsculas, como su imagen: "mi semana", "lo mío", "a mi ritmo".

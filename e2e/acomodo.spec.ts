@@ -3,7 +3,7 @@
 
 import { expect, test, type Page } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrirHoja, revisarQueNoSeMueveDeLado, revisarQueSeLee, revisarQueSeToca } from './ayuda'
+import { abrirConLiga, abrirHoja, revisarQueNoSeMueveDeLado, revisarQueSeLee, revisarQueSeToca } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 const ANCHOS = [
@@ -16,7 +16,7 @@ const ANCHOS = [
 // - lo hecho y las ideas usadas van "a media opacidad" (contraste 2.8);
 // - los bloques de una hora miden un poco menos de 44 de alto en los teléfonos de 393 a 402.
 const LO_HECHO = '.renglon.hecho .renglon-texto, .renglon.usada .renglon-texto'
-const BLOQUES = '.bloque'
+const BLOQUES = '.bloque, .hueco' // los huecos al editar miden lo mismo que los bloques
 
 async function revisarTodo(page: Page) {
   // La estrella ☆ es su signo: una por pantalla, máximo
@@ -40,23 +40,35 @@ for (const tamano of ANCHOS) {
     await page.setViewportSize(tamano)
     await page.clock.setFixedTime(new Date(MIERCOLES))
 
-    // La primera vez
+    // Sin liga: la semana de ejemplo, y en ajustes dónde pegar la suya
     await page.goto('./')
-    await page.getByRole('textbox', { name: 'tu semana' }).waitFor()
-    await revisarTodo(page)
-
-    // Su semana (la de ejemplo pegada como si fuera la suya) y sus ajustes
-    await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-    await page.getByRole('button', { name: 'listo' }).click()
     await page.locator('.bloque').first().waitFor()
     await revisarTodo(page)
-    await page.getByRole('button', { name: 'ajustes' }).click()
-    await page.waitForTimeout(350)
+    await abrirHoja(page, 'ajustes')
+    await revisarTodo(page)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
+    // Su semana (con su liga) y sus ajustes
+    await abrirConLiga(page)
+    await revisarTodo(page)
+    await abrirHoja(page, 'ajustes')
     await page.getByRole('button', { name: 'pegar un respaldo' }).click()
     await revisarTodo(page)
     await page.getByRole('button', { name: 'pegar semana nueva' }).click()
     await revisarTodo(page)
-    await page.keyboard.press('Escape')
+
+    // Editar su semana: el horario en modo edición, un bloque, un hueco y sábado
+    await page.getByRole('button', { name: 'editar mi semana' }).click()
+    await expect(page.getByRole('dialog')).toBeHidden()
+    await revisarTodo(page)
+    for (const que of ['editar Velas', 'agregar el lun a las 7', 'sábado']) {
+      await abrirHoja(page, que)
+      await revisarTodo(page)
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('dialog')).toBeHidden()
+    }
+    await page.getByRole('button', { name: 'listo' }).click()
 
     // Las hojas del ejemplo, que traen de todo: pendientes, hechos, listas e ideas
     await page.goto('?demo=1')

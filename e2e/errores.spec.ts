@@ -3,7 +3,7 @@
 
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, abrirHoja, esperarGuardado } from './ayuda'
+import { abrir, abrirConLiga, abrirHoja, esperarGuardado } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 
@@ -179,20 +179,13 @@ test.describe('irse a otra app a la mitad de algo', () => {
     await hoja.getByRole('textbox', { name: '+ escribe un pendiente…' }).fill('solo del ejemplo')
     await irAOtraApp(page)
     const suya = await page.context().newPage()
-    await suya.goto('./')
-    await suya.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-    await suya.getByRole('button', { name: 'listo' }).click()
+    await abrirConLiga(suya)
     const suHoja = await abrirHoja(suya, 'editar Velas')
     await expect(suHoja.getByRole('textbox', { name: '+ escribe un pendiente…' })).toHaveValue('')
   })
 
   test('pegando una liga en "mis ligas": se guarda aunque iOS cierre la app', async ({ page }) => {
-    await page.clock.setFixedTime(new Date(MIERCOLES))
-    await page.goto('./')
-    await page
-      .getByRole('textbox', { name: 'tu semana' })
-      .fill(JSON.stringify({ ...ejemplo, ligas: { planeador: '', correo: 'message://' } }))
-    await page.getByRole('button', { name: 'listo' }).click()
+    await abrirConLiga(page, JSON.stringify({ ...ejemplo, ligas: { planeador: '', correo: 'message://' } }))
     await page.getByRole('button', { name: 'ajustes' }).click()
     await page.waitForTimeout(350)
     await page.getByRole('textbox', { name: 'crear lo mío · subir videos' }).fill('https://example.com/mi-plan')

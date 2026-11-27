@@ -1,7 +1,8 @@
-// Ajustes: se llega tocando el solecito. Copiar el respaldo de todo, pegar un respaldo
-// para que todo regrese como estaba, sus ligas (ella misma pega la de su planeador)
-// y pegar una semana nueva.
-// En la semana de ejemplo no se toca nada de lo suyo: solo lleva de regreso a su semana.
+// Ajustes: se llega tocando el solecito. Editar su semana, copiar el respaldo de todo,
+// pegar un respaldo para que todo regrese como estaba, sus ligas (ella misma pega la de
+// su planeador) y pegar una semana nueva.
+// En la semana de ejemplo no se toca nada de lo suyo: si todavía no tiene semana en este
+// teléfono, aquí la pega; con ?demo=1, solo lleva de regreso a su semana.
 
 import { useEffect, useState } from 'react'
 import { copiarTexto } from '../componentes/copiar'
@@ -16,7 +17,8 @@ import type { Semana } from '../logic/semana'
 const ERROR = 'ese texto no lo pude leer. Tu semana sigue igual.'
 
 interface Props {
-  ejemplo: boolean
+  /** Se está viendo la semana de ejemplo: con ?demo=1, o porque aquí todavía no hay semana suya */
+  ejemplo: 'demo' | 'sin-semana' | null
   semana: Semana
   /** Su semana tal cual está guardada (no se usa en el ejemplo) */
   textoSemana: string
@@ -25,19 +27,35 @@ interface Props {
   onPegar: (texto: string, conHojas: boolean) => Promise<boolean>
   /** Guarda una liga; regresa si se pudo (si no es una dirección, no) */
   onLiga: (clave: string, valor: string) => Promise<boolean>
+  /** Pasa el horario a modo edición */
+  onEditar: () => void
   onCerrada: () => void
 }
 
-export function Ajustes({ ejemplo, semana, textoSemana, guardado, onPegar, onLiga, onCerrada }: Props) {
+export function Ajustes({ ejemplo, semana, textoSemana, guardado, onPegar, onLiga, onEditar, onCerrada }: Props) {
   return (
     <HojaQueSube titulo="ajustes" onCerrada={onCerrada}>
       {(cerrar) =>
-        ejemplo ? (
+        ejemplo === 'demo' ? (
           <section className="seccion">
             <p className="nota">esta es la semana de ejemplo. Lo que escribas aquí no toca tu semana.</p>
             <a className="boton" href="./">
               ir a mi semana
             </a>
+          </section>
+        ) : ejemplo === 'sin-semana' ? (
+          <section className="seccion" aria-label="mi semana">
+            <h3 className="seccion-titulo">mi semana</h3>
+            <p className="nota">esta es una semana de ejemplo. Si tienes tu semana o un respaldo, pégalo aquí.</p>
+            <PegarTexto
+              etiqueta="tu semana"
+              error="ese texto no lo pude leer."
+              onListo={async (texto) => {
+                const pudo = await onPegar(texto, true)
+                if (pudo) cerrar()
+                return pudo
+              }}
+            />
           </section>
         ) : (
           <DeSuSemana
@@ -46,6 +64,10 @@ export function Ajustes({ ejemplo, semana, textoSemana, guardado, onPegar, onLig
             guardado={guardado}
             onPegar={onPegar}
             onLiga={onLiga}
+            onEditar={() => {
+              onEditar()
+              cerrar()
+            }}
             cerrar={cerrar}
           />
         )
@@ -60,10 +82,11 @@ interface PropsSuya {
   guardado: Guardado
   onPegar: Props['onPegar']
   onLiga: Props['onLiga']
+  onEditar: () => void
   cerrar: () => void
 }
 
-function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: PropsSuya) {
+function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, onEditar, cerrar }: PropsSuya) {
   const ligas = ligasDeLaSemana(semana)
   const [respaldo, setRespaldo] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
@@ -98,6 +121,23 @@ function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: 
 
   return (
     <>
+      <section className="seccion" aria-label="mi semana">
+        <h3 className="seccion-titulo">mi semana</h3>
+        <button type="button" className="boton" onClick={onEditar}>
+          editar mi semana
+        </button>
+        {pegando === 'semana' ? (
+          <>
+            <p className="nota">lo que escribiste en cada hoja se queda.</p>
+            <PegarTexto etiqueta="tu semana nueva" error={ERROR} onListo={pegar(false)} autoFocus />
+          </>
+        ) : (
+          <button type="button" className="enlace enlace-suelto" onClick={() => setPegando('semana')}>
+            pegar semana nueva
+          </button>
+        )}
+      </section>
+
       <section className="seccion" aria-label="respaldo">
         <h3 className="seccion-titulo">respaldo</h3>
         <p className="nota">tu semana y todo lo que escribiste, en un texto para guardar en tu WhatsApp.</p>
@@ -126,20 +166,6 @@ function DeSuSemana({ semana, textoSemana, guardado, onPegar, onLiga, cerrar }: 
           ))}
         </section>
       )}
-
-      <section className="seccion" aria-label="mi semana">
-        <h3 className="seccion-titulo">mi semana</h3>
-        {pegando === 'semana' ? (
-          <>
-            <p className="nota">lo que escribiste en cada hoja se queda.</p>
-            <PegarTexto etiqueta="tu semana nueva" error={ERROR} onListo={pegar(false)} autoFocus />
-          </>
-        ) : (
-          <button type="button" className="enlace enlace-suelto" onClick={() => setPegando('semana')}>
-            pegar semana nueva
-          </button>
-        )}
-      </section>
     </>
   )
 }
@@ -162,11 +188,12 @@ function LigaCampo({ liga, onGuardar }: { liga: LigaDeSemana; onGuardar: (valor:
     <div className="liga">
       <label>
         {/* Si no sirve, lo dice aquí mismo, en lugar del nombre: así nada se mueve */}
-        <span className="liga-nombre" aria-live="polite">
+        <span className="etiqueta" aria-live="polite">
           {fallo ? 'esa liga no la pude leer.' : liga.bloques.join(' · ')}
         </span>
         <input
           aria-label={liga.bloques.join(' · ')}
+          className="campo"
           type="url"
           inputMode="url"
           value={texto}

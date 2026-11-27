@@ -4,16 +4,12 @@
 
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import ejemplo from '../src/datos/semana-ejemplo.json' with { type: 'json' }
-import { abrir, abrirHoja } from './ayuda'
+import { abrir, abrirConLiga, abrirHoja } from './ayuda'
 
 const MIERCOLES = '2026-11-25T12:30:00-06:00'
 
 async function pegarSuSemana(page: Page) {
-  await page.clock.setFixedTime(new Date(MIERCOLES))
-  await page.goto('./')
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(JSON.stringify(ejemplo))
-  await page.getByRole('button', { name: 'listo' }).click()
-  await page.locator('.bloque').first().waitFor()
+  await abrirConLiga(page)
 }
 
 async function abrirAjustes(page: Page) {
@@ -56,7 +52,7 @@ test.describe('nada se mueve cuando sale un aviso', () => {
     await copiar.click()
     await expect(hoja.getByText('copiado ☆ pégalo en tu WhatsApp')).toBeVisible()
     expect(await caja(pegar)).toEqual(antesPegar)
-    expect(await caja(hoja.locator('.boton').first())).toEqual(antesCopiar)
+    expect(await caja(hoja.locator('[aria-label="respaldo"] .boton'))).toEqual(antesCopiar)
   })
 
   test('"copiar" la lista: "editar" no se recorre cuando dice "copiado"', async ({ page, context }) => {
@@ -72,17 +68,18 @@ test.describe('nada se mueve cuando sale un aviso', () => {
 
   test('pegar algo que no sirve: el aviso sale sin mover "listo" ni lo de abajo, y se va igual', async ({ page }) => {
     await page.goto('./')
-    const campo = page.getByRole('textbox', { name: 'tu semana' })
-    const listo = page.getByRole('button', { name: 'listo' })
-    const ejemploLiga = page.getByRole('link', { name: 'ver ejemplo' })
+    const hoja = await abrirAjustes(page)
+    const campo = hoja.getByRole('textbox', { name: 'tu semana' })
+    const listo = hoja.getByRole('button', { name: 'listo' })
+    const aviso = hoja.getByRole('status')
     await campo.fill('hola')
-    const antes = [await caja(listo), await caja(ejemploLiga)]
+    const antes = [await caja(listo), await caja(aviso)]
     await listo.click()
-    await expect(page.getByText('ese texto no lo pude leer.')).toBeVisible()
-    expect([await caja(listo), await caja(ejemploLiga)]).toEqual(antes)
+    await expect(hoja.getByText('ese texto no lo pude leer.')).toBeVisible()
+    expect([await caja(listo), await caja(aviso)]).toEqual(antes)
     await campo.fill('hola de nuevo')
-    await expect(page.getByText('ese texto no lo pude leer.')).toHaveCount(0)
-    expect([await caja(listo), await caja(ejemploLiga)]).toEqual(antes)
+    await expect(hoja.getByText('ese texto no lo pude leer.')).toHaveCount(0)
+    expect([await caja(listo), await caja(aviso)]).toEqual(antes)
   })
 
   test('una liga que no sirve: el aviso no mueve la liga de abajo', async ({ page }) => {
@@ -153,8 +150,9 @@ test.describe('se siente como app', () => {
       await expect(hoja).toBeVisible()
     }
     await page.goto('./')
-    await page.getByRole('textbox', { name: 'tu semana' }).fill('algo')
-    const { antes, presionado } = await alPresionar(page, page.getByRole('button', { name: 'listo' }))
+    const ajustes = await abrirAjustes(page)
+    await ajustes.getByRole('textbox', { name: 'tu semana' }).fill('algo')
+    const { antes, presionado } = await alPresionar(page, ajustes.getByRole('button', { name: 'listo' }))
     expect(presionado, 'listo').not.toBe(antes)
   })
 

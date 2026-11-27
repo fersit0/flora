@@ -1,62 +1,82 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AvisoVersion } from './componentes/AvisoVersion'
 import { abrirGuardado } from './datos/guardado'
 import { contenidoDeEjemplo, semanaDeEjemplo } from './datos/ejemplo'
+import { textoDeSemana } from './logic/editar'
+import { leerLiga } from './logic/liga'
 import { cambiarLiga, conservarLigas } from './logic/ligas'
-import { leerDatos } from './logic/respaldo'
+import { leerDatos, type Hojas } from './logic/respaldo'
 import type { Semana } from './logic/semana'
 import { Ajustes } from './pantallas/Ajustes'
+import { EditarBloque } from './pantallas/EditarBloque'
+import { EditarFinde } from './pantallas/EditarFinde'
 import { Finde } from './pantallas/Finde'
 import { Hoja } from './pantallas/Hoja'
 import { Horario, type QueAbre } from './pantallas/Horario'
-import { PegaTuSemana } from './pantallas/PegaTuSemana'
 
-// Con ?demo=1 se ve la semana de ejemplo, y lo que se escribe en sus hojas se guarda
-// aparte ("flora-ejemplo"): el guardado de su semana ("flora") ni se abre.
+// Su semana se guarda en "flora". La de ejemplo (la que ve quien abre Flora sin su liga,
+// o con ?demo=1) guarda lo que se escribe en sus hojas aparte, en "flora-ejemplo".
 const demo = new URLSearchParams(location.search).get('demo') === '1'
-const guardado = demo ? abrirGuardado('flora-ejemplo', contenidoDeEjemplo) : abrirGuardado('flora')
+const suGuardado = abrirGuardado('flora')
+const guardadoDeEjemplo = abrirGuardado('flora-ejemplo', contenidoDeEjemplo)
 
 // Si la página se recargó con una hoja abierta, esa marca del historial ya no sirve
 if (history.state?.hoja) history.replaceState(null, '')
 
 type Estado =
   | { modo: 'cargando' }
-  /** Todavía no pega su semana */
-  | { modo: 'primera' }
+  /** Sin su semana guardada (ni liga): se ve la de ejemplo */
+  | { modo: 'ejemplo' }
   | { modo: 'semana'; semana: Semana; textoSemana: string }
 
 export function App() {
-  const [estado, setEstado] = useState<Estado>(() =>
-    demo ? { modo: 'semana', semana: semanaDeEjemplo(), textoSemana: '' } : { modo: 'cargando' },
-  )
+  const [estado, setEstado] = useState<Estado>(() => (demo ? { modo: 'ejemplo' } : { modo: 'cargando' }))
   // Lo que está abierto en una hoja (solo una a la vez)
   const [abierta, setAbierta] = useState<QueAbre | null>(null)
+  // Modo edición de su semana
+  const [editando, setEditando] = useState(false)
+  const ejemplo = useMemo(() => semanaDeEjemplo(), [])
 
-  // Su semana está guardada en el teléfono desde que la pegó
-  // Si no se pudo leer, no se finge que no tiene semana (le pediría pegarla otra vez):
-  // se queda esperando y vuelve a intentar al regresar a la app.
+  // Abre con su semana: la guardada en el teléfono o, la primera vez, la que trae su liga
+  // de instalación (?semana=…). La liga nunca pisa una semana ya guardada.
+  // Si no se pudo leer el guardado, no se finge que no tiene semana: se queda esperando
+  // y vuelve a intentar al regresar a la app.
   useEffect(() => {
     if (demo) return
     let sigue = true
     let listo = false
-    const leer = () => {
+    const leer = async () => {
       if (listo) return
-      guardado
-        .leerSemana()
-        .then((texto) => {
-          if (!sigue) return
-          listo = true
-          const lectura = texto === null ? null : leerDatos(texto)
-          setEstado(
-            lectura?.ok
-              ? { modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana }
-              : { modo: 'primera' },
-          )
-        })
-        .catch(() => {})
+      let texto: string | null
+      try {
+        texto = await suGuardado.leerSemana()
+      } catch {
+        return
+      }
+      if (!sigue || listo) return
+      if (texto === null) {
+        const deLaLiga = await leerLiga(location.search + location.hash)
+        const lectura = deLaLiga === null ? null : leerDatos(deLaLiga)
+        if (lectura?.ok) {
+          try {
+            await suGuardado.guardarDatos(lectura.textoSemana, lectura.hojas)
+            texto = lectura.textoSemana
+          } catch {
+            return
+          }
+        }
+      }
+      if (!sigue) return
+      listo = true
+      const lectura = texto === null ? null : leerDatos(texto)
+      setEstado(
+        lectura?.ok ? { modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana } : { modo: 'ejemplo' },
+      )
     }
-    leer()
-    const alVolver = () => document.visibilityState === 'visible' && leer()
+    void leer()
+    const alVolver = () => {
+      if (document.visibilityState === 'visible') void leer()
+    }
     document.addEventListener('visibilitychange', alVolver)
     return () => {
       sigue = false
@@ -65,7 +85,20 @@ export function App() {
   }, [])
 
   // Su semana guardada ahorita (para conservar sus ligas al pegar otra)
-  const textoActual = estado.modo === 'semana' && !demo ? estado.textoSemana : null
+  const textoActual = estado.modo === 'semana' ? estado.textoSemana : null
+
+  /** Guarda su semana (y, si viene de un respaldo, lo que escribió) y la pone en pantalla */
+  const guardarTexto = useCallback(async (textoSemana: string, hojas: Hojas | null) => {
+    const lectura = leerDatos(textoSemana)
+    if (!lectura.ok) return false
+    try {
+      await suGuardado.guardarDatos(lectura.textoSemana, hojas)
+    } catch {
+      return false
+    }
+    setEstado({ modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana })
+    return true
+  }, [])
 
   /**
    * Usa el texto que pegó (una semana o un respaldo). Las ligas que vienen vacías conservan
@@ -75,36 +108,23 @@ export function App() {
     async (texto: string, conHojas: boolean) => {
       const primera = leerDatos(texto)
       if (!primera.ok) return false
-      const lectura = textoActual ? leerDatos(conservarLigas(primera.textoSemana, textoActual)) : primera
-      if (!lectura.ok) return false
-      try {
-        await guardado.guardarDatos(lectura.textoSemana, conHojas ? primera.hojas : null)
-      } catch {
-        return false
-      }
-      setEstado({ modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana })
-      return true
+      const semana = textoActual ? conservarLigas(primera.textoSemana, textoActual) : primera.textoSemana
+      return guardarTexto(semana, conHojas ? primera.hojas : null)
     },
-    [textoActual],
+    [textoActual, guardarTexto],
   )
 
   /** Guarda una liga que ella pegó en los ajustes. Si no es una dirección, no cambia nada. */
   const guardarLiga = useCallback(
     async (clave: string, valor: string) => {
-      if (!textoActual) return false
-      const texto = cambiarLiga(textoActual, clave, valor)
-      const lectura = texto === null ? null : leerDatos(texto)
-      if (!lectura?.ok) return false
-      try {
-        await guardado.guardarDatos(lectura.textoSemana, null)
-      } catch {
-        return false
-      }
-      setEstado({ modo: 'semana', semana: lectura.semana, textoSemana: lectura.textoSemana })
-      return true
+      const texto = textoActual === null ? null : cambiarLiga(textoActual, clave, valor)
+      return texto === null ? false : guardarTexto(texto, null)
     },
-    [textoActual],
+    [textoActual, guardarTexto],
   )
+
+  /** Guarda su semana después de editarla */
+  const guardarSemana = useCallback((semana: Semana) => guardarTexto(textoDeSemana(semana), null), [guardarTexto])
 
   const alCerrar = useCallback(() => setAbierta(null), [])
 
@@ -114,53 +134,62 @@ export function App() {
     document.documentElement.classList.toggle('con-hoja', hayHoja)
   }, [hayHoja])
 
-  let pantalla: ReactNode = null
-  if (estado.modo === 'primera') {
-    // Pegar aquí un respaldo también regresa sus listas
-    pantalla = <PegaTuSemana onListo={(texto) => usarDatos(texto, true)} />
-  } else if (estado.modo === 'semana') {
-    const { semana } = estado
-    let hoja: ReactNode = null
-    if (abierta && 'espacio' in abierta) {
-      const espacio = semana.espacios.find((e) => e.id === abierta.espacio)
-      if (espacio) {
-        hoja = (
-          <Hoja
-            key={espacio.id}
-            semana={semana}
-            espacio={espacio}
-            detalle={abierta.detalle}
-            guardado={guardado}
-            onCerrada={alCerrar}
-          />
-        )
-      }
-    } else if (abierta && 'finde' in abierta) {
-      hoja = <Finde key={abierta.finde} dia={abierta.finde} texto={semana.finde[abierta.finde]} onCerrada={alCerrar} />
-    } else if (abierta) {
+  if (estado.modo === 'cargando') return <AvisoVersion />
+
+  const suya = estado.modo === 'semana'
+  const semana = suya ? estado.semana : ejemplo
+  const guardado = suya ? suGuardado : guardadoDeEjemplo
+
+  let hoja: ReactNode = null
+  if (abierta && 'espacio' in abierta) {
+    const espacio = semana.espacios.find((e) => e.id === abierta.espacio)
+    if (espacio) {
       hoja = (
-        <Ajustes
-          ejemplo={demo}
+        <Hoja
+          key={espacio.id}
           semana={semana}
-          textoSemana={estado.textoSemana}
+          espacio={espacio}
+          detalle={abierta.detalle}
           guardado={guardado}
-          onPegar={usarDatos}
-          onLiga={guardarLiga}
           onCerrada={alCerrar}
         />
       )
     }
-    pantalla = (
-      <>
-        <Horario semana={semana} onAbrir={setAbierta} tapado={hoja !== null} />
-        {hoja}
-      </>
+  } else if (abierta && 'finde' in abierta) {
+    hoja = <Finde key={abierta.finde} dia={abierta.finde} texto={semana.finde[abierta.finde]} onCerrada={alCerrar} />
+  } else if (abierta && 'editar' in abierta && suya) {
+    hoja = <EditarBloque semana={semana} lugar={abierta.editar} onGuardar={guardarSemana} onCerrada={alCerrar} />
+  } else if (abierta && 'agregar' in abierta && suya) {
+    hoja = (
+      <EditarBloque semana={semana} lugar={null} nuevo={abierta.agregar} onGuardar={guardarSemana} onCerrada={alCerrar} />
+    )
+  } else if (abierta && 'editarFinde' in abierta && suya) {
+    hoja = <EditarFinde semana={semana} dia={abierta.editarFinde} onGuardar={guardarSemana} onCerrada={alCerrar} />
+  } else if (abierta && 'ajustes' in abierta) {
+    hoja = (
+      <Ajustes
+        ejemplo={demo ? 'demo' : suya ? null : 'sin-semana'}
+        semana={semana}
+        textoSemana={suya ? estado.textoSemana : ''}
+        guardado={guardado}
+        onPegar={usarDatos}
+        onLiga={guardarLiga}
+        onEditar={() => setEditando(true)}
+        onCerrada={alCerrar}
+      />
     )
   }
 
   return (
     <>
-      {pantalla}
+      <Horario
+        semana={semana}
+        onAbrir={setAbierta}
+        tapado={hoja !== null}
+        editando={suya && editando}
+        onListo={() => setEditando(false)}
+      />
+      {hoja}
       <AvisoVersion />
     </>
   )

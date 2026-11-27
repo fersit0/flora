@@ -17,9 +17,12 @@ async function abrirLaSuya(page: Page) {
   await page.evaluate(() => document.fonts.ready)
 }
 
+/** Sin liga, en un teléfono sin su semana: la pega en ajustes */
 async function pegarPrimeraVez(page: Page, texto: string) {
-  await page.getByRole('textbox', { name: 'tu semana' }).fill(texto)
-  await page.getByRole('button', { name: 'listo' }).click()
+  const hoja = await abrirAjustes(page)
+  await hoja.getByRole('textbox', { name: 'tu semana' }).fill(texto)
+  await hoja.getByRole('button', { name: 'listo' }).click()
+  await expect(hoja).toBeHidden()
 }
 
 async function abrirAjustes(page: Page) {
@@ -58,37 +61,48 @@ async function guardadoDe(page: Page, espacio: string) {
   )
 }
 
-test('la primera vez pide pegar su semana; al pegarla se ve su horario y se queda guardado', async ({ page }) => {
+test('sin su liga abre directo en la semana de ejemplo; en ajustes pega la suya y se queda guardada', async ({ page }) => {
   await abrirLaSuya(page)
-  await expect(page.getByRole('heading', { name: 'pega aquí tu semana' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'listo' })).toBeDisabled()
-  await revisarQueNoHayRojo(page)
-
-  await pegarPrimeraVez(page, SEMANA)
+  // Nada que pegar para empezar: se ve la semana de ejemplo
   await expect(page.locator('.bloque')).toHaveCount(TOTAL_BLOQUES)
+  await expect(page.getByText('pega aquí tu semana')).toHaveCount(0)
+  const hoja = await abrirAjustes(page)
+  await expect(hoja.getByText('esta es una semana de ejemplo.', { exact: false })).toBeVisible()
+  await expect(hoja.getByRole('button', { name: 'listo' })).toBeDisabled()
+  await expect(hoja.getByRole('button', { name: 'editar mi semana' })).toHaveCount(0)
+  await revisarQueNoHayRojo(page)
+  await page.keyboard.press('Escape')
+  await expect(hoja).toBeHidden()
+
+  // Su semana (aquí, la de ejemplo con otro nombre en un bloque)
+  await pegarPrimeraVez(page, SEMANA.replace('"caminar"', '"yoga"'))
+  await expect(page.locator('.bloque', { hasText: 'yoga' })).not.toHaveCount(0)
   await revisarQueCabe(page)
 
   // Cerrar y volver a abrir: abre directo en su horario
   await page.reload()
-  await expect(page.locator('.bloque')).toHaveCount(TOTAL_BLOQUES)
-  await expect(page.getByRole('heading', { name: 'pega aquí tu semana' })).toHaveCount(0)
+  await expect(page.locator('.bloque', { hasText: 'yoga' })).not.toHaveCount(0)
 })
 
 test('pegar algo que no sirve lo dice en una frase y no cambia nada', async ({ page }) => {
   await abrirLaSuya(page)
+  let hoja = await abrirAjustes(page)
+  const campo = hoja.getByRole('textbox', { name: 'tu semana' })
   for (const malo of ['hola', 'Semana 1\nVideo largo 3/03', '{"version": 1}', SEMANA.slice(0, 300)]) {
-    await pegarPrimeraVez(page, malo)
-    await expect(page.getByText('ese texto no lo pude leer.')).toBeVisible()
-    await expect(page.locator('.bloque')).toHaveCount(0)
+    await campo.fill(malo)
+    await hoja.getByRole('button', { name: 'listo' }).click()
+    await expect(hoja.getByText('ese texto no lo pude leer.')).toBeVisible()
   }
   // Al cambiar el texto, la frase se va
-  await page.getByRole('textbox', { name: 'tu semana' }).fill('')
-  await expect(page.getByText('ese texto no lo pude leer.')).toHaveCount(0)
+  await campo.fill('')
+  await expect(hoja.getByText('ese texto no lo pude leer.')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(hoja).toBeHidden()
 
   // Ya con su semana, pegar algo malo en ajustes tampoco cambia nada
   await pegarPrimeraVez(page, SEMANA)
   await agregarPendiente(page, 'Agencia', 'llamar al dentista')
-  const hoja = await abrirAjustes(page)
+  hoja = await abrirAjustes(page)
   await hoja.getByRole('button', { name: 'pegar semana nueva' }).click()
   await hoja.getByRole('textbox', { name: 'tu semana nueva' }).fill('{"version": 1, "dias": "nada"}')
   await hoja.getByRole('button', { name: 'listo' }).click()
@@ -236,13 +250,6 @@ test('"ver ejemplo" abre la semana de ejemplo sin tocar la suya, y de ahí se re
   const agencia = await abrirHoja(page, 'Agencia')
   await expect(agencia.getByText('lo mío')).toBeVisible()
   await expect(agencia.getByText('solo del ejemplo')).toHaveCount(0)
-})
-
-test('desde la primera pantalla, "ver ejemplo" lleva a la semana de ejemplo', async ({ page }) => {
-  await abrirLaSuya(page)
-  await page.getByRole('link', { name: 'ver ejemplo' }).click()
-  await expect(page).toHaveURL(/\?demo=1$/)
-  await expect(page.locator('.bloque')).toHaveCount(TOTAL_BLOQUES)
 })
 
 test('la semana de ejemplo sigue abriendo directo, como antes', async ({ page }) => {

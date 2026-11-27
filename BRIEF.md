@@ -35,8 +35,8 @@ La app no trae "su" semana escrita en el código. Trae un motor que dibuja cualq
 
 Esto resuelve tres cosas:
 
-- **Privacidad.** El repo y la página son públicos. Su horario (dónde está cada día y a qué hora) no puede estar ahí. En el repo solo va una semana de ejemplo inventada. La suya entra a su teléfono pegando un texto una sola vez.
-- **Que no se quede vieja.** Su semana va a cambiar (cuando termine su servicio, cuando cambie un cliente). Se actualiza pegando datos nuevos, sin volver a programar.
+- **Privacidad.** El repo y la página son públicos. Su horario (dónde está cada día y a qué hora) no puede estar ahí. En el repo solo va una semana de ejemplo inventada. La suya entra a su teléfono con su liga de instalación (ver "Datos y respaldo").
+- **Que no se quede vieja.** Su semana va a cambiar (cuando termine su servicio, cuando cambie un cliente). Ella misma la edita desde la app, sin volver a programar.
 - **Pruebas.** La semana de ejemplo sirve para probar todo sin tocar datos reales.
 
 Modelo:
@@ -92,17 +92,29 @@ Modelo:
 - El resumen por responsabilidad (por ejemplo "viernes mando la propuesta, martes grabo, miércoles edito") no es un botón. Va como una línea bajo el título de la hoja de cada espacio. En el primer mockup era un botón "por cada cosa" y ella no lo entendió.
 
 ### Datos y respaldo
-- Primera vez: pantalla "pega aquí tu semana" (y un botón "ver ejemplo"). Pegar el texto de datos carga su semana.
-- Ajustes (se llega tocando el solecito): pegar semana nueva, **copiar respaldo** de todo (semana + pendientes + listas + ideas) y **pegar respaldo** para restaurar.
+- **Abre con su semana desde la primera vez, sin pegar nada.** Fer corre `node scripts/liga.mjs` en su compu: lee `privado/semana.json` y sus listas de `privado/CONTENIDO.md` y deja en `privado/liga-de-instalacion.txt` una liga de Flora con todo eso comprimido después de `?semana=`. Se la manda por WhatsApp; ella la abre en Safari y la agrega a inicio, y la app instalada abre ya con su semana y sus listas.
+  - Esa liga es privada: trae su horario adentro. No se publica en ningún lado; solo pasa por el servidor de GitHub cuando ella la abre.
+  - Lo que se probó en el simulador (27 nov 2026): al agregar a inicio, el iPhone instala la app en la dirección que dice el manifiesto (`/flora/`) y tira todo lo que trae la liga, sea después de `#` o de `?`. Por eso, cuando la página se abre con su liga, no lleva manifiesto: así el iPhone instala la liga completa.
+  - La liga solo carga la semana la primera vez. Si ya hay una semana guardada, no la pisa.
+- Quien abre la página sin su liga ve directo la semana de ejemplo. En ajustes puede pegar su semana o un respaldo.
+- Ajustes (se llega tocando el solecito): **editar mi semana**, pegar semana nueva, **copiar respaldo** de todo (semana + pendientes + listas + ideas) y **pegar respaldo** para restaurar.
 - El texto que se pega es JSON. La semana y el respaldo usan el mismo formato: un respaldo es la semana más lo que ella escribió. Así se le puede instalar la app ya con sus listas cargadas.
 - Si se borra el ícono de la app, iOS borra sus datos. Por eso el respaldo es texto que ella puede guardar en su WhatsApp.
 - Guardado: IndexedDB con `idb`, y se pide `navigator.storage.persist()`.
 - Aviso discreto cuando hay versión nueva de la app.
 
+### Editar su semana
+- En ajustes, "editar mi semana": el horario entra en modo edición (dice "editando", con un botón "listo" para salir).
+- Tocar un bloque abre una hoja para cambiar nombre, emoji, de qué es, día, hora de inicio y de fin, y qué toca ahí; ahí también se borra (pide un segundo toque).
+- Tocar un hueco crea ahí un bloque nuevo de una hora (o menos, si no cabe).
+- Lo que abre cada bloque sale de "de qué es" (los tipos que hay en su semana: sus clientes, sus ligas, las comidas, "para mí"…). No se configura.
+- Si el nombre no cabe en el bloque o dos bloques se enciman, lo dice en una frase amable y no lo guarda: se queda lo último que sí quedaba bien.
+- Sábado y domingo: su texto corto y el largo.
+- Los cambios se guardan solos y entran al respaldo. Fuera del modo edición todo funciona igual.
+
 ## Después (no entra en la primera versión)
 
 - **Comidas.** Desayuno, comida y cena abren opciones, con dos modos: en casa y en la calle. Las opciones salen del plan que ella misma va a mandar. Las "recomendaciones" a partir de sus equivalentes se preparan antes (las arma Claude con Fer y entran como datos); la app no tiene IA adentro. Mientras no exista, esos bloques no abren nada.
-- Editar los bloques desde la app.
 
 ## Qué no hace
 
@@ -128,7 +140,7 @@ Pruebas automáticas (si fallan, no se publica):
 
 Pruebas a mano en su teléfono, antes de dársela:
 
-6. Instalada en la pantalla de inicio, abre a pantalla completa y directo en el horario. Aquí se revisa en su pantalla real (iPhone 17 Pro, 402 × 874; al principio se asumió 440 × 956).
+6. Instalada desde su liga, abre a pantalla completa y directo en su semana. Aquí se revisa en su pantalla real (iPhone 17 Pro, 402 × 874; al principio se asumió 440 × 956).
 7. Cada liga: abre o se quita.
 8. Agregar un pendiente toma menos de 5 segundos desde que toca el bloque.
 9. El respaldo copiado se puede pegar en WhatsApp y volver a pegar en la app.
@@ -151,7 +163,8 @@ Cada fase se ve funcionando antes de pasar a la siguiente.
 3. **Datos.** Pegar semana, copiar y pegar respaldo, ajustes.
 4. **Lo demás de la pantalla.** Sábado y domingo, ligas.
 5. **Diseño fino, ícono, instalar y publicar.** Prueba en su teléfono con sus datos reales.
-6. **Comidas**, cuando ella mande su plan.
+6. **Su semana desde la primera vez y editarla desde la app.** Pedido por Fer el 27 nov 2026: la liga de instalación y el modo edición.
+7. **Comidas**, cuando ella mande su plan.
 
 ## Nombre e ícono
 
